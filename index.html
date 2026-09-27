@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dorella · Gestão</title>
+<meta name="description" content="Controle de estoque, vendas, recebíveis e financeiro da Dorella Prata 925.">
+<meta name="theme-color" content="#0b0b0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dorella">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  color-scheme: light;
+  --ink:#0b0b0b; --ink-2:#1c1c1c; --bg:#f5f4f1; --card:#ffffff; --line:#e7e4de; --line-2:#d9d5cd;
+  --muted:#78746c; --soft:#efede8; --silver:#a7abb1; --silver-2:#c9ccd1;
+  --pos:#2e7a4d; --pos-bg:#e7f3ec; --neg:#b0402d; --neg-bg:#f8e9e5; --warn:#a56f12; --warn-bg:#fbf1dc;
+  --info:#3f5f7a; --info-bg:#e6eef5;
+  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(0,0,0,.05);
+  --serif:'Cormorant Garamond', Georgia, serif; --sans:'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --silver-grad:linear-gradient(120deg,#8e9298 0%,#e9eaec 35%,#b3b6bb 55%,#f4f4f5 75%,#9a9ea4 100%);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:.2px;margin:0}
+.hidden{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+
+/* ---------- Login ---------- */
+#login{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--ink);padding:24px}
+.login-box{width:100%;max-width:360px;text-align:center;color:#fff}
+.login-box img{width:78%;max-width:260px;margin:0 auto 10px;display:block}
+.login-box .line{height:1px;background:var(--silver-grad);margin:26px auto;width:60%;opacity:.8}
+.login-box input{width:100%;background:#161616;border:1px solid #2c2c2c;border-radius:10px;padding:13px 14px;margin-bottom:10px;color:#fff;font-size:16px}
+.login-box input:focus{outline:none;border-color:var(--silver)}
+.login-box .btn{width:100%;justify-content:center;background:#fff;color:var(--ink);padding:13px;margin-top:6px}
+.login-box .err{color:#f0a493;font-size:13px;min-height:20px;margin-top:8px}
+.login-box .link{background:none;border:0;color:var(--silver-2);font-size:13px;margin-top:10px;cursor:pointer;text-decoration:underline}
+
+/* ---------- Header / nav ---------- */
+header.top{background:var(--ink);color:#fff;position:sticky;top:0;z-index:30;padding-top:env(safe-area-inset-top)}
+.top-row{display:flex;align-items:center;gap:14px;padding:12px 20px 8px;max-width:1280px;margin:0 auto}
+.top-row .brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.brand .mono{height:34px}
+.brand .word{height:26px}
+.sync{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--silver-2);white-space:nowrap}
+.sync .dot{width:8px;height:8px;border-radius:50%;background:#777}
+.sync.ok .dot{background:#5fc28a} .sync.pend .dot{background:#e5b54a} .sync.off .dot{background:#999}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 14px;max-width:1280px;margin:0 auto}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{background:none;border:0;color:#bdbdbd;padding:10px 12px 12px;cursor:pointer;white-space:nowrap;font-size:14px;letter-spacing:.3px;position:relative}
+nav.tabs button:hover{color:#fff}
+nav.tabs button.on{color:#fff}
+nav.tabs button.on::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;background:var(--silver-grad);border-radius:2px}
+.top-line{height:1px;background:var(--silver-grad);opacity:.55}
+
+main{max-width:1280px;margin:0 auto;padding:22px 20px calc(60px + env(safe-area-inset-bottom))}
+.view-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.view-head h1{font-size:34px;line-height:1}
+.view-head .sub{margin:4px 0 0;color:var(--muted);font-size:14px}
+.view-head .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- Controls ---------- */
+.btn{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:999px;padding:9px 16px;cursor:pointer;font-size:14px;font-weight:500;letter-spacing:.2px;text-decoration:none;white-space:nowrap}
+.btn:hover{background:#2a2a2a}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-2)}
+.btn.ghost:hover{background:var(--soft)}
+.btn.danger{background:transparent;color:var(--neg);border-color:#e6c2ba}
+.btn.danger:hover{background:var(--neg-bg)}
+.btn.ok{background:var(--pos);border-color:var(--pos)}
+.btn.sm{padding:6px 11px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.ico{width:16px;height:16px;flex:none}
+.icon-btn{background:none;border:1px solid transparent;border-radius:8px;padding:6px;cursor:pointer;color:var(--muted);display:inline-flex}
+.icon-btn:hover{background:var(--soft);color:var(--ink)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.inp, .filters input, .filters select, .form input, .form select, .form textarea{background:var(--card);border:1px solid var(--line-2);border-radius:10px;padding:9px 12px;font-size:15px;min-height:40px;width:100%}
+.filters input, .filters select{width:auto;flex:1 1 160px;max-width:280px}
+.filters input[type=search]{flex:2 1 220px;max-width:360px}
+input:focus, select:focus, textarea:focus{outline:2px solid rgba(11,11,11,.12);border-color:var(--ink)}
+.seg{display:inline-flex;background:var(--soft);border-radius:999px;padding:3px;margin-bottom:14px}
+.seg button{border:0;background:none;padding:7px 16px;border-radius:999px;cursor:pointer;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* ---------- Cards / KPIs ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.card h3{font-size:20px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi .l{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.kpi .v{font-size:24px;font-weight:500;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .h{font-size:12.5px;color:var(--muted);margin-top:2px}
+.kpi.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.kpi.dark .l,.kpi.dark .h{color:#b9b9b9}
+.kpi.dark::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--silver-grad)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.ch{position:relative;height:260px}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);font-size:14px}
+.empty .big{font-family:var(--serif);font-size:22px;color:var(--ink);margin-bottom:4px}
+.summary{display:flex;gap:18px;flex-wrap:wrap;font-size:13.5px;color:var(--muted);margin:-4px 0 12px}
+.summary b{color:var(--ink);font-weight:500}
+
+/* ---------- Tables ---------- */
+.tbl-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-weight:500;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:11px 12px;border-bottom:1px solid var(--line);background:#fbfaf8;white-space:nowrap}
+.tbl td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr:hover{background:#fcfbf9}
+.tbl .r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl .acts{text-align:right;white-space:nowrap}
+.tbl .t1{font-weight:500}
+.tbl .t2{font-size:12.5px;color:var(--muted)}
+.tbl tr.click{cursor:pointer}
+.badge{display:inline-block;font-size:11.5px;font-weight:500;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--muted);white-space:nowrap;letter-spacing:.2px}
+.badge.pos{background:var(--pos-bg);color:var(--pos)} .badge.neg{background:var(--neg-bg);color:var(--neg)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)} .badge.info{background:var(--info-bg);color:var(--info)}
+.badge.dark{background:var(--ink);color:#fff}
+
+/* ---------- Modal ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(10,10,10,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .15s}
+@keyframes fade{from{opacity:0}}
+.modal{background:var(--card);border-radius:18px;width:100%;max-width:560px;max-height:calc(100dvh - 40px);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal.wide{max-width:920px}
+.modal .mh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.modal .mh h2{font-size:24px}
+.modal .mb{padding:18px 20px;overflow:auto;-webkit-overflow-scrolling:touch}
+.modal .mf{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line);padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+.form{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.form label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--muted);grid-column:span 12;letter-spacing:.2px}
+.form .c6{grid-column:span 6} .form .c4{grid-column:span 4} .form .c3{grid-column:span 3} .form .c8{grid-column:span 8}
+.form textarea{min-height:70px;resize:vertical}
+.form .sec{grid-column:span 12;font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);margin-top:6px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.form .chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:14px}
+.form .chk input{width:18px;height:18px;min-height:0}
+.lines{grid-column:span 12;display:flex;flex-direction:column;gap:10px}
+.ln{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:2.4fr .7fr 1fr 1fr auto;gap:10px;align-items:end;background:#fcfbf9}
+.ln.sale{grid-template-columns:2.6fr .7fr 1fr 1fr auto}
+.ln label{grid-column:auto}
+.ln .calc{grid-column:1/-1;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.ln .calc b{color:var(--ink);font-weight:500}
+.totbox{grid-column:span 12;background:var(--ink);color:#fff;border-radius:12px;padding:14px 16px;display:flex;gap:22px;flex-wrap:wrap;position:relative;overflow:hidden}
+.totbox::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--silver-grad)}
+.totbox div{display:flex;flex-direction:column}
+.totbox small{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#aaa}
+.totbox b{font-size:18px;font-weight:500;font-variant-numeric:tabular-nums}
+.pgrid{grid-column:span 12}
+.pgrid table{width:100%;border-collapse:collapse;font-size:14px}
+.pgrid td,.pgrid th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+.pgrid th{font-size:12px;color:var(--muted);font-weight:500}
+.pgrid input{min-height:36px;padding:6px 8px}
+.hint{grid-column:span 12;font-size:13px;color:var(--muted);background:var(--soft);border-radius:10px;padding:10px 12px}
+.hint.warn{background:var(--warn-bg);color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--soft);border-radius:999px;padding:5px 6px 5px 12px;font-size:14px}
+.chip button{border:0;background:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;color:var(--muted)}
+.list-mini{display:flex;flex-direction:column}
+.list-mini .it{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.list-mini .it:last-child{border-bottom:0}
+
+/* ---------- Toast ---------- */
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:fade .2s}
+.toast.err{background:var(--neg)}
+
+/* ---------- Print (fatura / carnê) ---------- */
+#print-root{display:none}
+@media print{
+  body.printing > *:not(#print-root){display:none!important}
+  body.printing #print-root{display:block}
+  body{background:#fff}
+  @page{margin:14mm}
+}
+.pdoc{font-family:var(--sans);color:#000;max-width:760px;margin:0 auto}
+.pdoc .ph{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid #000;padding-bottom:12px;margin-bottom:14px}
+.pdoc .ph img{height:54px}
+.pdoc h2{font-size:26px}
+.pdoc table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 16px}
+.pdoc th,.pdoc td{padding:6px 4px;border-bottom:1px solid #ddd;text-align:left}
+.pdoc .r{text-align:right}
+.coupon{border:1px dashed #555;border-radius:8px;padding:12px 14px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;break-inside:avoid;font-size:13px}
+.coupon small{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#666}
+.coupon b{font-size:15px}
+
+/* ---------- Responsive ---------- */
+@media (max-width:900px){
+  .grid2,.grid3{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  main{padding:16px 16px calc(60px + env(safe-area-inset-bottom))}
+  .top-row{padding:10px 16px 6px}
+  .brand .word{height:21px}
+  .brand .mono{height:28px}
+  .view-head h1{font-size:30px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi{padding:12px}
+  .kpi .v{font-size:19px}
+  .filters input,.filters select{max-width:none;flex:1 1 140px}
+  .tbl-wrap{background:none;border:0;box-shadow:none;overflow:visible}
+  table.tbl, .tbl tbody{display:block}
+  .tbl thead{display:none}
+  .tbl tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .tbl td{padding:0;border:0;font-size:14px}
+  .tbl td[data-l]::before{content:attr(data-l);display:block;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+  .tbl td.main{grid-column:1/-1;font-size:15px;order:-1}
+  .tbl td.main::before{display:none!important}
+  .tbl .r{text-align:left}
+  .tbl .acts{grid-column:1/-1;text-align:left;display:flex;gap:6px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--line);margin-top:4px}
+  .modal-bg{padding:0;align-items:flex-end}
+  .modal,.modal.wide{max-width:none;border-radius:18px 18px 0 0;max-height:94dvh}
+  .form .c6,.form .c4,.form .c3,.form .c8{grid-column:span 12}
+  .form .m6{grid-column:span 6}
+  .ln,.ln.sale{grid-template-columns:1fr 1fr}
+  .ln label:first-child{grid-column:1/-1}
+  .ln .rm{grid-column:1/-1;justify-self:end}
+  .ch{height:230px}
+  .coupon{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="login" class="hidden">
+  <div class="login-box">
+    <img src="img/monograma-branco.png" alt="" style="width:74px;margin-bottom:22px">
+    <img src="img/logo-dorella-branco.png" alt="Dorella Prata 925">
+    <div class="line"></div>
+    <form id="loginForm">
+      <input type="email" name="email" placeholder="E-mail" autocomplete="username" required>
+      <input type="password" name="senha" placeholder="Senha" autocomplete="current-password" required>
+      <button class="btn" type="submit">Entrar</button>
+      <div class="err" id="loginErr"></div>
+      <button type="button" class="link" id="forgot">Esqueci minha senha</button>
+    </form>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand">
+        <img class="mono" src="img/monograma-branco.png" alt="">
+        <img class="word" src="img/logo-dorella-branco.png" alt="Dorella Prata 925">
+      </div>
+      <div class="sync" id="sync"><span class="dot"></span><span class="txt">—</span></div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-go="dashboard">Dashboard</button>
+      <button data-go="estoque">Estoque</button>
+      <button data-go="vendas">Vendas</button>
+      <button data-go="receber">A Receber</button>
+      <button data-go="financeiro">Financeiro</button>
+      <button data-go="cadastros">Clientes &amp; Fornecedores</button>
+      <button data-go="config">Backup &amp; Ajustes</button>
+    </nav>
+    <div class="top-line"></div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<div id="toasts"></div>
+<div id="print-root"></div>
+
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO DO FIREBASE (sincronização em tempo real)
+   Troque o  null  abaixo pelo objeto que o Firebase te mostrar, ex.:
+   const FIREBASE_CONFIG = { apiKey: "...", authDomain: "...", projectId: "...", storageBucket: "...", messagingSenderId: "...", appId: "..." };
+   Enquanto estiver null, o sistema funciona em MODO LOCAL (dados só neste aparelho).
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDCVbw6Ebh4nG6Oej31bHaj1bH_MWowli4",
+  authDomain: "dorellafinanceiro.firebaseapp.com",
+  projectId: "dorellafinanceiro",
+  storageBucket: "dorellafinanceiro.firebasestorage.app",
+  messagingSenderId: "67007876055",
+  appId: "1:67007876055:web:f2c6dcc4641111cd9ad992"
+};
+/* ===================================================================== */
+
+const FB_VER = '10.12.2';
+const COLS = ['produtos','clientes','fornecedores','entradas','vendas','parcelas','movimentos','config'];
+const DEFAULT_CATS = ['Colar','Brinco','Anel','Pulseira','Berloque','Tornozeleira','Conjunto'];
+const FORMAS = {pix:'Pix',dinheiro:'Dinheiro',debito:'Cartão de débito',credito:'Cartão de crédito',prazo:'A prazo (crediário)'};
+const FIN_CATS_IN = ['Venda à vista','Recebimento a prazo','Entrada de venda a prazo','Saldo inicial','Aporte','Outras entradas'];
+const FIN_CATS_OUT = ['Compra de mercadoria','Frete','Embalagem','Marketing','Taxas e tarifas','Retirada / Pró-labore','Aluguel','Outras despesas'];
+const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const LS_DATA = 'dorella_dados_v1', LS_CFG = 'dorella_fbcfg', LS_TAB = 'dorella_tab', LS_BKP = 'dorella_ultimo_backup';
+
+/* ---------------- utilidades ---------------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const BRL = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+const money = v => BRL.format(+v || 0);
+const pct = v => (isFinite(v) && v !== null) ? (v*100).toFixed(1).replace('.',',') + '%' : '—';
+const round2 = v => Math.round((+v + Number.EPSILON) * 100) / 100;
+const num = s => { if (typeof s === 'number') return s; s = String(s ?? '').trim().replace(/[R$\s]/g,''); if (!s) return 0; if (s.includes(',')) s = s.replace(/\./g,'').replace(',','.'); const n = parseFloat(s); return isNaN(n) ? 0 : n; };
+const nf = v => (v === '' || v === null || v === undefined) ? '' : String(round2(v)).replace('.',',');
+const sum = (a, f = x => x) => (a || []).reduce((t, x) => t + (+f(x) || 0), 0);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const today = () => iso(new Date());
+const fmtDate = s => s ? s.split('-').reverse().join('/') : '';
+const ym = s => (s || '').slice(0, 7);
+const ymLabel = k => { const [y, m] = k.split('-'); return MESES[+m-1] + '/' + y.slice(2); };
+const addMonths = (s, n) => { const [y,m,d] = s.split('-').map(Number); const dt = new Date(y, m-1+n, 1); const last = new Date(dt.getFullYear(), dt.getMonth()+1, 0).getDate(); dt.setDate(Math.min(d, last)); return iso(dt); };
+const addDays = (s, n) => { const [y,m,d] = s.split('-').map(Number); return iso(new Date(y, m-1, d+n)); };
+const monthsBack = (n, from = new Date()) => { const out = []; for (let i = n-1; i >= 0; i--) { const d = new Date(from.getFullYear(), from.getMonth()-i, 1); out.push(iso(d).slice(0,7)); } return out; };
+const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const onlyDigits = s => String(s || '').replace(/\D/g,'');
+
+const IC = {
+  plus:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  edit:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
+  trash:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  x:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  print:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 9V4h10v5M7 17H4v-7h16v7h-3M7 14h10v6H7z"/></svg>',
+  wa:'<svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3z"/></svg>',
+  check:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
+  undo:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>',
+  down:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  up:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M7 10l5-5 5 5M5 20h14"/></svg>',
+};
+
+function toast(msg, type='') {
+  const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg;
+  $('#toasts').appendChild(t); setTimeout(() => t.remove(), type === 'err' ? 5000 : 2600);
+}
+
+/* ---------------- armazenamento / sincronização ---------------- */
+const S = Object.fromEntries(COLS.map(c => [c, []]));
+let MODE = 'local', fdb = null, fbUser = null, unsubs = [];
+const meta = {pending:false, fromCache:false};
+
+function loadLocal() {
+  try { const d = JSON.parse(localStorage.getItem(LS_DATA) || '{}'); COLS.forEach(c => S[c] = Array.isArray(d[c]) ? d[c] : []); } catch (e) {}
+}
+function saveLocal() {
+  try { localStorage.setItem(LS_DATA, JSON.stringify(S)); } catch (e) { toast('Não foi possível salvar neste aparelho', 'err'); }
+}
+const clean = o => JSON.parse(JSON.stringify(o));
+const userLabel = () => fbUser ? (fbUser.email || '').split('@')[0] : 'local';
+
+function applyLocal(ops) {
+  ops.forEach(o => {
+    const arr = S[o.col];
+    if (o.t === 'set') { const i = arr.findIndex(x => x.id === o.doc.id); if (i >= 0) arr[i] = o.doc; else arr.push(o.doc); }
+    else { const i = arr.findIndex(x => x.id === o.id); if (i >= 0) arr.splice(i, 1); }
+  });
+}
+/* ops: [{t:'set', col, doc}] | [{t:'del', col, id}] */
+async function commit(ops, {wait = false} = {}) {
+  ops = ops.filter(Boolean);
+  if (!ops.length) return;
+  const stamp = {atualizadoEm: new Date().toISOString(), atualizadoPor: userLabel()};
+  ops.forEach(o => { if (o.t === 'set') o.doc = clean({...o.doc, ...stamp}); });
+  applyLocal(ops);
+  if (MODE === 'firebase') {
+    const run = async () => {
+      for (let i = 0; i < ops.length; i += 400) {
+        const b = fdb.batch();
+        ops.slice(i, i+400).forEach(o => {
+          const ref = fdb.collection(o.col).doc(o.t === 'set' ? o.doc.id : o.id);
+          o.t === 'set' ? b.set(ref, o.doc) : b.delete(ref);
+        });
+        await b.commit();
+      }
+    };
+    const p = run().catch(e => { console.error(e); toast('Erro ao sincronizar: ' + (e.code || e.message), 'err'); });
+    if (wait) await p;
+  } else saveLocal();
+  scheduleRender();
+}
+
+function loadScript(src) {
+  return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => fail(new Error('Falha ao carregar ' + src)); document.head.appendChild(s); });
+}
+function parseCfg(txt) {
+  if (!txt) return null;
+  if (typeof txt === 'object') return txt;
+  const a = txt.indexOf('{'), b = txt.lastIndexOf('}');
+  if (a < 0 || b < a) return null;
+  let s = txt.slice(a, b+1).replace(/'/g, '"').replace(/([{,]\s*)([A-Za-z_]\w*)\s*:/g, '$1"$2":').replace(/,\s*}/g, '}');
+  try { const o = JSON.parse(s); return o.apiKey && o.projectId ? o : null; } catch (e) { return null; }
+}
+function getCfg() { if (FIREBASE_CONFIG) return FIREBASE_CONFIG; try { return parseCfg(localStorage.getItem(LS_CFG)); } catch (e) { return null; } }
+
+async function initFirebase(cfg) {
+  const base = `https://www.gstatic.com/firebasejs/${FB_VER}/`;
+  await loadScript(base + 'firebase-app-compat.js');
+  await Promise.all([loadScript(base + 'firebase-auth-compat.js'), loadScript(base + 'firebase-firestore-compat.js')]);
+  firebase.initializeApp(cfg);
+  fdb = firebase.firestore();
+  try { await fdb.enablePersistence({synchronizeTabs: true}); } catch (e) { console.warn('Persistência offline indisponível', e.code); }
+  MODE = 'firebase';
+  firebase.auth().onAuthStateChanged(u => {
+    fbUser = u;
+    if (u) { subscribe(); showApp(); }
+    else { unsubs.forEach(f => f()); unsubs = []; COLS.forEach(c => S[c] = []); showLogin(); }
+  });
+}
+function subscribe() {
+  unsubs.forEach(f => f()); unsubs = [];
+  const st = {};
+  COLS.forEach(c => {
+    unsubs.push(fdb.collection(c).onSnapshot({includeMetadataChanges: true}, snap => {
+      S[c] = snap.docs.map(d => ({...d.data(), id: d.id}));
+      st[c] = snap.metadata;
+      meta.pending = Object.values(st).some(m => m.hasPendingWrites);
+      meta.fromCache = Object.values(st).some(m => m.fromCache);
+      updateSync();
+      scheduleRender();
+    }, err => { console.error(err); toast(err.code === 'permission-denied' ? 'Sem permissão: confira as regras do Firestore (veja o passo a passo).' : 'Erro: ' + err.message, 'err'); }));
+  });
+}
+function updateSync() {
+  const el = $('#sync'); if (!el) return;
+  let cls = 'off', txt = 'Modo local';
+  if (MODE === 'firebase') {
+    if (!navigator.onLine || meta.fromCache) { cls = 'off'; txt = 'Offline · salvo no aparelho'; }
+    else if (meta.pending) { cls = 'pend'; txt = 'Sincronizando…'; }
+    else { cls = 'ok'; txt = 'Sincronizado'; }
+  }
+  el.className = 'sync ' + cls; $('.txt', el).textContent = txt;
+}
+addEventListener('online', updateSync); addEventListener('offline', updateSync);
+
+/* ---------------- dados derivados ---------------- */
+let D = null;
+function derived() {
+  if (D) return D;
+  const P = Object.fromEntries(S.produtos.map(p => [p.id, p]));
+  const C = Object.fromEntries(S.clientes.map(p => [p.id, p]));
+  const F = Object.fromEntries(S.fornecedores.map(p => [p.id, p]));
+  const V = Object.fromEntries(S.vendas.map(p => [p.id, p]));
+  const st = {};
+  S.produtos.forEach(p => st[p.id] = {qIn:0, cIn:0, qOut:0, qtd:0, custo:0});
+  S.entradas.forEach(e => {
+    const base = sum(e.itens, i => i.qtd * i.custo), qt = sum(e.itens, i => i.qtd);
+    (e.itens || []).forEach(i => {
+      const s = st[i.produtoId]; if (!s) return;
+      const share = base > 0 ? (e.frete || 0) * (i.qtd * i.custo) / base : (qt ? (e.frete || 0) * i.qtd / qt : 0);
+      s.qIn += i.qtd; s.cIn += i.qtd * i.custo + share;
+    });
+  });
+  S.vendas.forEach(v => (v.itens || []).forEach(i => { const s = st[i.produtoId]; if (s) s.qOut += i.qtd; }));
+  Object.values(st).forEach(s => { s.qtd = s.qIn - s.qOut; s.custo = s.qIn ? s.cIn / s.qIn : 0; });
+  const t = today();
+  const parcSt = p => p.status === 'recebida' ? 'recebida' : (p.vencimento < t ? 'vencida' : 'aberta');
+  D = {P, C, F, V, st, parcSt, t};
+  return D;
+}
+const cats = () => (S.config.find(c => c.id === 'geral') || {}).categorias || DEFAULT_CATS;
+const prodLabel = p => p ? `${p.codigo ? p.codigo + ' · ' : ''}${p.nome}` : '(produto removido)';
+const cliName = id => { const c = derived().C[id]; return c ? c.nome : (id ? '(cliente removido)' : 'Cliente não informado'); };
+const fornName = id => { const f = derived().F[id]; return f ? f.nome : (id ? '(fornecedor removido)' : 'Sem fornecedor'); };
+const vendaTotals = v => {
+  const bruto = sum(v.itens, i => i.qtd * i.preco), total = round2(bruto - (v.desconto || 0));
+  const custo = sum(v.itens, i => i.qtd * (i.custo || 0)), lucro = total - custo;
+  return {bruto, total, custo, lucro, margem: total ? lucro / total : NaN, pecas: sum(v.itens, i => i.qtd)};
+};
+const entradaTotals = e => { const prod = sum(e.itens, i => i.qtd * i.custo); return {prod, frete: +e.frete || 0, total: round2(prod + (+e.frete || 0)), pecas: sum(e.itens, i => i.qtd)}; };
+
+/* ---------------- render / navegação ---------------- */
+const UI = {
+  dPer: 'mes', estTab: 'produtos', estQ: '', estCat: '', estFil: '', entQ: '', entMes: '',
+  venQ: '', venMes: '', venForma: '', recSt: 'pendentes', recQ: '', recMes: '',
+  finMes: today().slice(0,7), finTipo: '', finQ: '', cadTab: 'clientes', cadQ: ''
+};
+let cur = 'dashboard', rq = false, appOn = false;
+function scheduleRender() {
+  D = null; if (rq) return; rq = true;
+  requestAnimationFrame(() => { rq = false; if (appOn && VIEWS[cur]) VIEWS[cur].update(); });
+}
+function go(v) {
+  if (!VIEWS[v]) v = 'dashboard';
+  cur = v; try { localStorage.setItem(LS_TAB, v); } catch (e) {}
+  $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
+  const el = $('#view'); el.innerHTML = '';
+  VIEWS[v].mount(el); VIEWS[v].update();
+  window.scrollTo(0, 0);
+  const on = $('#tabs button.on'); if (on) on.scrollIntoView({block:'nearest', inline:'center'});
+}
+function showLogin() { appOn = false; $('#app').classList.add('hidden'); $('#login').classList.remove('hidden'); }
+function showApp() {
+  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  if (!appOn) { appOn = true; let t = 'dashboard'; try { t = localStorage.getItem(LS_TAB) || t; } catch (e) {} go(t); }
+  updateSync();
+}
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+
+/* ações globais via data-act */
+const ACT = {};
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const f = ACT[a.dataset.act]; if (!f) return;
+  e.preventDefault(); e.stopPropagation(); f(a.dataset, a);
+});
+
+/* ---------------- modal ---------------- */
+function modal({title, body, foot = '', wide = false, onMount}) {
+  const bg = document.createElement('div'); bg.className = 'modal-bg';
+  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true">
+    <div class="mh"><h2>${esc(title)}</h2><button class="icon-btn" data-x aria-label="Fechar">${IC.x}</button></div>
+    <div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
+  document.body.appendChild(bg);
+  document.body.style.overflow = 'hidden';
+  const close = () => { bg.remove(); if (!$('.modal-bg')) document.body.style.overflow = ''; };
+  $('[data-x]', bg).onclick = close;
+  bg.addEventListener('mousedown', e => { if (e.target === bg) bg._down = true; });
+  bg.addEventListener('click', e => { if (e.target === bg && bg._down) close(); bg._down = false; });
+  const m = {el: bg, close};
+  if (onMount) onMount(bg, m);
+  return m;
+}
+const val = (m, n) => { const el = $(`[name="${n}"]`, m); return el ? (el.type === 'checkbox' ? el.checked : el.value.trim()) : ''; };
+
+/* ---------------- opções de select ---------------- */
+function prodOptions(sel) {
+  const d = derived(); const groups = {};
+  [...S.produtos].sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => (groups[p.categoria || 'Outros'] ||= []).push(p));
+  return '<option value="">Selecione o produto…</option>' + Object.keys(groups).sort().map(g =>
+    `<optgroup label="${esc(g)}">${groups[g].map(p => `<option value="${esc(p.id)}" ${p.id === sel ? 'selected' : ''}>${esc(prodLabel(p))} (${d.st[p.id]?.qtd ?? 0} em estoque)</option>`).join('')}</optgroup>`).join('');
+}
+const listOptions = (arr, sel, empty) => `<option value="">${esc(empty)}</option>` + [...arr].sort((a, b) => a.nome.localeCompare(b.nome)).map(x => `<option value="${esc(x.id)}" ${x.id === sel ? 'selected' : ''}>${esc(x.nome)}</option>`).join('');
+const catOptions = (sel, empty) => (empty ? `<option value="">${esc(empty)}</option>` : '') + cats().map(c => `<option ${c === sel ? 'selected' : ''}>${esc(c)}</option>`).join('');
+
+const emptyBox = (big, small, btn = '') => `<div class="card empty"><div class="big">${big}</div>${small}${btn ? `<div style="margin-top:14px">${btn}</div>` : ''}</div>`;
+
+/* =====================================================================
+   PRODUTOS
+   ===================================================================== */
+function nextCode(cat) {
+  const pre = ({'Colar':'CO','Brinco':'BR','Anel':'AN','Pulseira':'PU','Berloque':'BE','Tornozeleira':'TO','Conjunto':'CJ'})[cat] || norm(cat).replace(/[^a-z]/g,'').slice(0,2).toUpperCase() || 'PR';
+  let max = 0; S.produtos.forEach(p => { const m = (p.codigo || '').match(new RegExp('^' + pre + '-(\\d+)$')); if (m) max = Math.max(max, +m[1]); });
+  return `${pre}-${String(max + 1).padStart(3, '0')}`;
+}
+function openProduto(id, {onSaved} = {}) {
+  const p = S.produtos.find(x => x.id === id) || {};
+  const s = derived().st[id];
+  const isNew = !p.id;
+  modal({
+    title: isNew ? 'Novo produto' : 'Editar produto',
+    body: `<div class="form">
+      <label class="c6">Categoria<select name="categoria">${catOptions(p.categoria || cats()[0])}</select></label>
+      <label class="c6">Código<input name="codigo" value="${esc(p.codigo || nextCode(p.categoria || cats()[0]))}"></label>
+      <label>Nome da peça<input name="nome" value="${esc(p.nome || '')}" placeholder="Ex.: Brinco argola lisa 2cm"></label>
+      <label class="c6">Preço de venda (R$)<input name="preco" inputmode="decimal" value="${nf(p.preco)}" placeholder="0,00"></label>
+      <label class="c6">Estoque mínimo (alerta)<input name="min" inputmode="numeric" value="${p.estoqueMin ?? 1}"></label>
+      <label>Observações<textarea name="obs" placeholder="Fornecedor habitual, tamanho, banho, etc.">${esc(p.obs || '')}</textarea></label>
+      ${s ? `<div class="hint" id="pInfo"></div>` : `<div class="hint">O custo e a quantidade entram quando você registrar uma <b>entrada (compra)</b> com este produto.</div>`}
+    </div>`,
+    foot: `<button class="btn ghost" data-x2>Cancelar</button><button class="btn" data-save>Salvar produto</button>`,
+    onMount(m, M) {
+      const info = () => { if (!s) return; const pr = num(val(m, 'preco')); const l = pr - s.custo;
+        $('#pInfo', m).innerHTML = `Em estoque: <b>${s.qtd}</b> · Custo médio (c/ frete): <b>${money(s.custo)}</b> · Lucro por peça: <b class="${l >= 0 ? 'pos' : 'neg'}">${money(l)}</b> · Margem: <b>${pct(pr ? l / pr : NaN)}</b>`; };
+      info();
+      $('[name=preco]', m).addEventListener('input', info);
+      $('[name=categoria]', m).addEventListener('change', e => { if (isNew) $('[name=codigo]', m).value = nextCode(e.target.value); });
+      $('[data-x2]', m).onclick = M.close;
+      $('[data-save]', m).onclick = () => {
+        const nome = val(m, 'nome'); if (!nome) return toast('Informe o nome da peça', 'err');
+        const codigo = val(m, 'codigo');
+        if (codigo && S.produtos.some(x => x.codigo === codigo && x.id !== p.id)) return toast('Já existe um produto com esse código', 'err');
+        const doc = {...p, id: p.id || uid(), nome, codigo, categoria: val(m, 'categoria'), preco: num(val(m, 'preco')), estoqueMin: num(val(m, 'min')), obs: val(m, 'obs'), criadoEm: p.criadoEm || new Date().toISOString()};
+        commit([{t:'set', col:'produtos', doc}]);
+        toast('Produto salvo'); M.close(); onSaved && onSaved(doc);
+      };
+    }
+  });
+}
+ACT.novoProduto = () => openProduto(null);
+ACT.editProduto = d => openProduto(d.id);
+ACT.delProduto = d => {
+  const p = derived().P[d.id]; if (!p) return;
+  if (S.entradas.some(e => e.itens.some(i => i.produtoId === p.id)) || S.vendas.some(v => v.itens.some(i => i.produtoId === p.id)))
+    return toast('Este produto tem entradas ou vendas registradas e não pode ser excluído.', 'err');
+  if (confirm(`Excluir o produto "${p.nome}"?`)) { commit([{t:'del', col:'produtos', id:p.id}]); toast('Produto excluído'); }
+};
+
+/* =====================================================================
+   ENTRADAS (compras)
+   ===================================================================== */
+function openEntrada(id) {
+  const e = S.entradas.find(x => x.id === id) || {};
+  const isNew = !e.id;
+  const itens = e.itens?.length ? e.itens : [{produtoId:'', qtd:1, custo:0}];
+  modal({
+    title: isNew ? 'Nova entrada no estoque' : 'Editar entrada', wide: true,
+    body: `<div class="form">
+      <label class="c4">Data da compra<input type="date" name="data" value="${esc(e.data || today())}"></label>
+      <label class="c8">Fornecedor<div style="display:flex;gap:8px"><select name="forn">${listOptions(S.fornecedores, e.fornecedorId, 'Sem fornecedor / estoque inicial')}</select><button class="btn ghost sm" type="button" data-nf>${IC.plus}Novo</button></div></label>
+      <div class="sec">Peças compradas</div>
+      <div class="lines" id="lines"></div>
+      <div style="grid-column:span 12;display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" type="button" data-add>${IC.plus}Adicionar item</button><button class="btn ghost sm" type="button" data-np>${IC.plus}Cadastrar novo produto</button></div>
+      <div class="sec">Frete e pagamento</div>
+      <label class="c4">Frete da compra (R$)<input name="frete" inputmode="decimal" value="${nf(e.frete)}" placeholder="0,00"></label>
+      <label class="c4 chk" style="align-self:end;padding-bottom:10px"><input type="checkbox" name="pago" ${e.pago !== false ? 'checked' : ''}> Lançar pagamento no financeiro</label>
+      <label class="c4" id="dpWrap">Data do pagamento<input type="date" name="dataPag" value="${esc(e.dataPagamento || e.data || today())}"></label>
+      <label>Observações<textarea name="obs">${esc(e.obs || '')}</textarea></label>
+      <div class="hint">O frete é dividido entre as peças proporcionalmente ao valor de cada item, e entra no custo de cada peça. A margem é calculada sobre o preço de venda: <b>(preço − custo com frete) ÷ preço</b>.</div>
+      <div class="totbox" id="tot"></div>
+    </div>`,
+    foot: `${!isNew ? `<button class="btn danger" data-del style="margin-right:auto">${IC.trash}Excluir</button>` : ''}<button class="btn ghost" data-x2>Cancelar</button><button class="btn" data-save>Salvar entrada</button>`,
+    onMount(m, M) {
+      const box = $('#lines', m);
+      const addLine = (it = {produtoId:'', qtd:1, custo:0}) => {
+        const p = derived().P[it.produtoId];
+        const div = document.createElement('div'); div.className = 'ln';
+        div.innerHTML = `<label>Produto<select data-f="p">${prodOptions(it.produtoId)}</select></label>
+          <label>Qtd<input data-f="q" inputmode="numeric" value="${it.qtd}"></label>
+          <label>Custo unit. (R$)<input data-f="c" inputmode="decimal" value="${nf(it.custo)}" placeholder="0,00"></label>
+          <label>Preço de venda (R$)<input data-f="v" inputmode="decimal" value="${nf(p?.preco)}" placeholder="0,00"></label>
+          <button class="icon-btn rm" type="button" title="Remover item">${IC.trash}</button>
+          <div class="calc"></div>`;
+        box.appendChild(div);
+        $('[data-f=p]', div).addEventListener('change', ev => { const pp = derived().P[ev.target.value]; $('[data-f=v]', div).value = nf(pp?.preco); calc(); });
+        $('.rm', div).onclick = () => { div.remove(); calc(); };
+      };
+      const calc = () => {
+        const rows = $$('.ln', box).map(r => ({r, q: num($('[data-f=q]', r).value), c: num($('[data-f=c]', r).value), v: num($('[data-f=v]', r).value)}));
+        const frete = num(val(m, 'frete')), base = sum(rows, x => x.q * x.c), qt = sum(rows, x => x.q);
+        rows.forEach(x => {
+          const share = base > 0 ? frete * (x.q * x.c) / base : (qt ? frete * x.q / qt : 0);
+          const cf = x.c + (x.q ? share / x.q : 0), l = x.v - cf;
+          $('.calc', x.r).innerHTML = `<span>Custo c/ frete: <b>${money(cf)}</b></span><span>Lucro/peça: <b class="${l >= 0 ? 'pos' : 'neg'}">${money(l)}</b></span><span>Margem: <b>${pct(x.v ? l / x.v : NaN)}</b></span><span>Subtotal: <b>${money(x.q * x.c)}</b></span>`;
+        });
+        const pv = sum(rows, x => x.q * x.v), tc = base + frete;
+        $('#tot', m).innerHTML = `<div><small>Peças</small><b>${qt}</b></div><div><small>Produtos</small><b>${money(base)}</b></div><div><small>Frete</small><b>${money(frete)}</b></div><div><small>Total da compra</small><b>${money(tc)}</b></div><div><small>Valor de venda</small><b>${money(pv)}</b></div><div><small>Lucro previsto</small><b>${money(pv - tc)}</b></div><div><small>Margem média</small><b>${pct(pv ? (pv - tc) / pv : NaN)}</b></div>`;
+      };
+      itens.forEach(addLine); calc();
+      box.addEventListener('input', calc);
+      $('[name=frete]', m).addEventListener('input', calc);
+      const tp = () => $('#dpWrap', m).style.visibility = $('[name=pago]', m).checked ? '' : 'hidden';
+      $('[name=pago]', m).addEventListener('change', tp); tp();
+      $('[data-add]', m).onclick = () => { addLine(); calc(); };
+      $('[data-np]', m).onclick = () => openProduto(null, {onSaved: doc => {
+        $$('[data-f=p]', box).forEach(s => { const v = s.value; s.innerHTML = prodOptions(v); });
+        let target = $$('.ln', box).find(r => !$('[data-f=p]', r).value);
+        if (!target) { addLine(); target = $$('.ln', box).pop(); }
+        $('[data-f=p]', target).value = doc.id; $('[data-f=v]', target).value = nf(doc.preco); calc();
+      }});
+      $('[data-nf]', m).onclick = () => openPessoa('fornecedores', null, {onSaved: doc => { $('[name=forn]', m).innerHTML = listOptions(S.fornecedores, doc.id, 'Sem fornecedor / estoque inicial'); }});
+      $('[data-x2]', m).onclick = M.close;
+      if (!isNew) $('[data-del]', m).onclick = () => { if (delEntrada(e.id)) M.close(); };
+      $('[data-save]', m).onclick = () => {
+        const rows = $$('.ln', box).map(r => ({produtoId: $('[data-f=p]', r).value, qtd: Math.round(num($('[data-f=q]', r).value)), custo: round2(num($('[data-f=c]', r).value)), venda: num($('[data-f=v]', r).value)}));
+        const ok = rows.filter(x => x.produtoId && x.qtd > 0);
+        if (!ok.length) return toast('Adicione pelo menos um produto com quantidade', 'err');
+        if (ok.length < rows.length && !confirm('Algumas linhas estão sem produto ou quantidade e serão ignoradas. Continuar?')) return;
+        const eid = e.id || uid();
+        const doc = {...e, id: eid, data: val(m, 'data') || today(), fornecedorId: val(m, 'forn'), itens: ok.map(({produtoId, qtd, custo}) => ({produtoId, qtd, custo})), frete: round2(num(val(m, 'frete'))), pago: val(m, 'pago'), dataPagamento: val(m, 'dataPag'), obs: val(m, 'obs'), criadoEm: e.criadoEm || new Date().toISOString()};
+        const ops = [{t:'set', col:'entradas', doc}];
+        const P = derived().P;
+        const seen = new Set();
+        ok.forEach(x => { const p = P[x.produtoId]; if (p && !seen.has(p.id) && round2(x.venda) !== round2(p.preco || 0) && x.venda > 0) { seen.add(p.id); ops.push({t:'set', col:'produtos', doc:{...p, preco: round2(x.venda)}}); } });
+        const tt = entradaTotals(doc);
+        if (doc.pago) ops.push({t:'set', col:'movimentos', doc:{id:'mov_ent_' + eid, data: doc.dataPagamento || doc.data, tipo:'saida', valor: tt.total, descricao:`Compra de mercadoria — ${fornName(doc.fornecedorId)}`, categoria:'Compra de mercadoria', origem:'entrada', refId: eid}});
+        else ops.push({t:'del', col:'movimentos', id:'mov_ent_' + eid});
+        commit(ops); toast('Entrada registrada'); M.close();
+      };
+    }
+  });
+}
+function delEntrada(id) {
+  const e = S.entradas.find(x => x.id === id); if (!e) return false;
+  if (!confirm('Excluir esta entrada? As peças saem do estoque e o pagamento lançado no financeiro também é removido.')) return false;
+  commit([{t:'del', col:'entradas', id}, {t:'del', col:'movimentos', id:'mov_ent_' + id}]); toast('Entrada excluída'); return true;
+}
+ACT.novaEntrada = () => { if (!S.produtos.length) toast('Dica: você pode cadastrar os produtos direto na tela da entrada'); openEntrada(null); };
+ACT.editEntrada = d => openEntrada(d.id);
+ACT.delEntrada = d => delEntrada(d.id);
+
+/* =====================================================================
+   VENDAS
+   ===================================================================== */
+function openVenda(id) {
+  const v = S.vendas.find(x => x.id === id) || {};
+  const isNew = !v.id;
+  const oldParc = S.parcelas.filter(p => p.vendaId === v.id);
+  if (!isNew && oldParc.some(p => p.status === 'recebida')) {
+    return toast('Esta venda já tem parcelas recebidas. Estorne os recebimentos em "A Receber" para poder editá-la.', 'err');
+  }
+  const itens = v.itens?.length ? v.itens : [{produtoId:'', qtd:1, preco:0}];
+  modal({
+    title: isNew ? 'Nova venda' : 'Editar venda', wide: true,
+    body: `<div class="form">
+      <label class="c4">Data da venda<input type="date" name="data" value="${esc(v.data || today())}"></label>
+      <label class="c8">Cliente<div style="display:flex;gap:8px"><select name="cli">${listOptions(S.clientes, v.clienteId, 'Cliente não informado')}</select><button class="btn ghost sm" type="button" data-nc>${IC.plus}Novo</button></div></label>
+      <div class="sec">Peças vendidas</div>
+      <div class="lines" id="lines"></div>
+      <div style="grid-column:span 12"><button class="btn ghost sm" type="button" data-add>${IC.plus}Adicionar item</button></div>
+      <div class="sec">Pagamento</div>
+      <label class="c4">Desconto (R$)<input name="desc" inputmode="decimal" value="${nf(v.desconto)}" placeholder="0,00"></label>
+      <label class="c8">Forma de pagamento<select name="forma">${Object.entries(FORMAS).map(([k, l]) => `<option value="${k}" ${k === (v.forma || 'pix') ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      <div id="prazo" style="grid-column:span 12;display:contents">
+        <label class="c3 m6">Entrada (R$)<input name="ent" inputmode="decimal" value="${nf(v.entrada)}" placeholder="0,00"></label>
+        <label class="c3 m6">Nº de parcelas<input name="np" inputmode="numeric" value="${v.parcelas || oldParc.length || 3}"></label>
+        <label class="c3 m6">1º vencimento<input type="date" name="venc1" value="${esc(oldParc.sort((a, b) => a.numero - b.numero)[0]?.vencimento || addMonths(v.data || today(), 1))}"></label>
+        <label class="c3 m6">Intervalo<select name="intv"><option value="m">Mensal</option><option value="15">A cada 15 dias</option><option value="7">Semanal</option></select></label>
+        <div class="pgrid" id="pgrid"></div>
+      </div>
+      <label>Observações<textarea name="obs">${esc(v.obs || '')}</textarea></label>
+      <div class="totbox" id="tot"></div>
+    </div>`,
+    foot: `${!isNew ? `<button class="btn danger" data-del style="margin-right:auto">${IC.trash}Excluir</button>` : ''}<button class="btn ghost" data-x2>Cancelar</button><button class="btn" data-save>Salvar venda</button>`,
+    onMount(m, M) {
+      const box = $('#lines', m);
+      const oldCost = Object.fromEntries((v.itens || []).map(i => [i.produtoId, i.custo]));
+      const oldQty = {}; (v.itens || []).forEach(i => oldQty[i.produtoId] = (oldQty[i.produtoId] || 0) + i.qtd);
+      const custoOf = pid => oldCost[pid] ?? derived().st[pid]?.custo ?? 0;
+      const addLine = (it = {produtoId:'', qtd:1, preco:0}) => {
+        const div = document.createElement('div'); div.className = 'ln sale';
+        div.innerHTML = `<label>Produto<select data-f="p">${prodOptions(it.produtoId)}</select></label>
+          <label>Qtd<input data-f="q" inputmode="numeric" value="${it.qtd}"></label>
+          <label>Preço unit. (R$)<input data-f="v" inputmode="decimal" value="${nf(it.preco)}" placeholder="0,00"></label>
+          <label>Subtotal<input data-f="s" disabled></label>
+          <button class="icon-btn rm" type="button" title="Remover item">${IC.trash}</button>
+          <div class="calc"></div>`;
+        box.appendChild(div);
+        $('[data-f=p]', div).addEventListener('change', ev => { const pp = derived().P[ev.target.value]; $('[data-f=v]', div).value = nf(pp?.preco); calc(); });
+        $('.rm', div).onclick = () => { div.remove(); calc(); };
+      };
+      let parcEdited = false;
+      const genParc = () => {
+        const t = tots(); const rest = round2(t.total - num(val(m, 'ent')));
+        const n = Math.max(1, Math.min(48, Math.round(num(val(m, 'np'))) || 1));
+        const v1 = val(m, 'venc1') || addMonths(val(m, 'data') || today(), 1), iv = val(m, 'intv');
+        const base = Math.floor(rest / n * 100) / 100; const rows = [];
+        for (let k = 1; k <= n; k++) {
+          const valor = k === n ? round2(rest - base * (n - 1)) : base;
+          rows.push({k, valor, venc: iv === 'm' ? addMonths(v1, k - 1) : addDays(v1, (k - 1) * +iv)});
+        }
+        $('#pgrid', m).innerHTML = `<table><thead><tr><th>Parcela</th><th>Vencimento</th><th>Valor (R$)</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.k}/${n}</td><td><input type="date" class="inp" data-pv value="${r.venc}"></td><td><input class="inp" data-pa inputmode="decimal" value="${nf(r.valor)}"></td></tr>`).join('')}</tbody></table><div class="muted" style="font-size:13px;margin-top:6px" id="pchk"></div>`;
+        parcEdited = false; chkParc();
+      };
+      const chkParc = () => {
+        const el = $('#pchk', m); if (!el) return;
+        const t = tots(); const rest = round2(t.total - num(val(m, 'ent'))); const s = round2(sum($$('[data-pa]', m), i => num(i.value)));
+        el.innerHTML = Math.abs(s - rest) > 0.009 ? `<span class="neg">Soma das parcelas (${money(s)}) diferente do saldo a prazo (${money(rest)}).</span>` : `Saldo a prazo: <b>${money(rest)}</b> — as datas e os valores podem ser ajustados.`;
+      };
+      const rowsData = () => $$('.ln', box).map(r => ({r, p: $('[data-f=p]', r).value, q: num($('[data-f=q]', r).value), v: num($('[data-f=v]', r).value)}));
+      const tots = () => { const rows = rowsData(); const bruto = sum(rows, x => x.q * x.v); const total = round2(bruto - num(val(m, 'desc'))); const custo = sum(rows, x => x.p ? x.q * custoOf(x.p) : 0); return {rows, bruto, total, custo}; };
+      const calc = () => {
+        const t = tots(), st = derived().st;
+        t.rows.forEach(x => {
+          $('[data-f=s]', x.r).value = money(x.q * x.v);
+          if (!x.p) { $('.calc', x.r).innerHTML = ''; return; }
+          const c = custoOf(x.p), l = x.v - c, disp = (st[x.p]?.qtd ?? 0) + (oldQty[x.p] || 0);
+          $('.calc', x.r).innerHTML = `<span>Custo: <b>${money(c)}</b></span><span>Lucro/peça: <b class="${l >= 0 ? 'pos' : 'neg'}">${money(l)}</b></span><span>Margem: <b>${pct(x.v ? l / x.v : NaN)}</b></span><span>Disponível: <b class="${disp < x.q ? 'neg' : ''}">${disp}</b></span>`;
+        });
+        const l = t.total - t.custo;
+        $('#tot', m).innerHTML = `<div><small>Subtotal</small><b>${money(t.bruto)}</b></div><div><small>Desconto</small><b>${money(num(val(m, 'desc')))}</b></div><div><small>Total da venda</small><b>${money(t.total)}</b></div><div><small>Custo</small><b>${money(t.custo)}</b></div><div><small>Lucro</small><b>${money(l)}</b></div><div><small>Margem</small><b>${pct(t.total ? l / t.total : NaN)}</b></div>`;
+        if (val(m, 'forma') === 'prazo') { if (!parcEdited) genParc(); else chkParc(); }
+      };
+      const tf = () => { const pz = val(m, 'forma') === 'prazo'; $('#prazo', m).style.display = pz ? 'contents' : 'none'; if (pz) genParc(); };
+      itens.forEach(addLine);
+      if (!isNew && oldParc.length) {
+        // mantém as parcelas já existentes na edição
+        tf(); const ps = [...oldParc].sort((a, b) => a.numero - b.numero);
+        $$('[data-pv]', m).forEach((i, k) => { if (ps[k]) i.value = ps[k].vencimento; });
+        $$('[data-pa]', m).forEach((i, k) => { if (ps[k]) i.value = nf(ps[k].valor); });
+        parcEdited = true; chkParc();
+      } else tf();
+      calc();
+      box.addEventListener('input', calc);
+      $('[name=desc]', m).addEventListener('input', calc);
+      $('[name=forma]', m).addEventListener('change', () => { tf(); calc(); });
+      ['ent', 'np', 'venc1', 'intv'].forEach(n => $(`[name=${n}]`, m).addEventListener(n === 'intv' || n === 'venc1' ? 'change' : 'input', genParc));
+      $('#pgrid', m).addEventListener('input', () => { parcEdited = true; chkParc(); });
+      $('[data-add]', m).onclick = () => { addLine(); calc(); };
+      $('[data-nc]', m).onclick = () => openPessoa('clientes', null, {onSaved: doc => { $('[name=cli]', m).innerHTML = listOptions(S.clientes, doc.id, 'Cliente não informado'); }});
+      $('[data-x2]', m).onclick = M.close;
+      if (!isNew) $('[data-del]', m).onclick = () => { if (delVenda(v.id)) M.close(); };
+      $('[data-save]', m).onclick = () => {
+        const t = tots(); const ok = t.rows.filter(x => x.p && x.q > 0);
+        if (!ok.length) return toast('Adicione pelo menos uma peça', 'err');
+        const st = derived().st; const need = {};
+        ok.forEach(x => need[x.p] = (need[x.p] || 0) + Math.round(x.q));
+        const falta = Object.entries(need).filter(([pid, q]) => q > (st[pid]?.qtd ?? 0) + (oldQty[pid] || 0));
+        if (falta.length && !confirm('Atenção: a quantidade vendida é maior que o estoque disponível de:\n' + falta.map(([pid]) => '• ' + prodLabel(derived().P[pid])).join('\n') + '\n\nSalvar mesmo assim?')) return;
+        const forma = val(m, 'forma'), cliId = val(m, 'cli');
+        if (forma === 'prazo' && !cliId && !confirm('Venda a prazo sem cliente informado. Continuar?')) return;
+        const vid = v.id || uid();
+        const doc = {...v, id: vid, data: val(m, 'data') || today(), clienteId: cliId, forma, desconto: round2(num(val(m, 'desc'))), obs: val(m, 'obs'),
+          itens: ok.map(x => ({produtoId: x.p, qtd: Math.round(x.q), preco: round2(x.v), custo: round2(custoOf(x.p) * 10000) / 10000})), criadoEm: v.criadoEm || new Date().toISOString()};
+        const total = vendaTotals(doc).total;
+        if (total < 0) return toast('O desconto é maior que o valor da venda', 'err');
+        const ops = [{t:'set', col:'vendas', doc}];
+        oldParc.forEach(p => ops.push({t:'del', col:'parcelas', id:p.id}, {t:'del', col:'movimentos', id:'mov_parc_' + p.id}));
+        const cn = cliId ? cliName(cliId) : 'cliente não informado';
+        if (forma !== 'prazo') {
+          doc.entrada = 0; doc.parcelas = 0;
+          ops.push({t:'set', col:'movimentos', doc:{id:'mov_venda_' + vid, data: doc.data, tipo:'entrada', valor: total, descricao:`Venda — ${cn} (${FORMAS[forma]})`, categoria:'Venda à vista', origem:'venda', refId: vid}});
+        } else {
+          const ent = round2(num(val(m, 'ent')));
+          const pv = $$('[data-pv]', m).map(i => i.value), pa = $$('[data-pa]', m).map(i => round2(num(i.value)));
+          if (ent > total) return toast('A entrada é maior que o total da venda', 'err');
+          if (Math.abs(round2(sum(pa)) - round2(total - ent)) > 0.009 && !confirm('A soma das parcelas não bate com o saldo a prazo. Salvar mesmo assim?')) return;
+          if (pv.some(x => !x)) return toast('Preencha todas as datas de vencimento', 'err');
+          doc.entrada = ent; doc.parcelas = pa.length;
+          if (ent > 0) ops.push({t:'set', col:'movimentos', doc:{id:'mov_venda_' + vid, data: doc.data, tipo:'entrada', valor: ent, descricao:`Entrada de venda a prazo — ${cn}`, categoria:'Entrada de venda a prazo', origem:'venda', refId: vid}});
+          else ops.push({t:'del', col:'movimentos', id:'mov_venda_' + vid});
+          pa.forEach((valor, k) => ops.push({t:'set', col:'parcelas', doc:{id:`parc_${vid}_${k + 1}`, vendaId: vid, clienteId: cliId, numero: k + 1, de: pa.length, valor, vencimento: pv[k], status:'aberta'}}));
+        }
+        // se a edição removeu parcelas com o mesmo id, o "set" posterior prevalece
+        commit(ops); toast(forma === 'prazo' ? `Venda salva — ${doc.parcelas} parcela(s) geradas em A Receber` : 'Venda salva e lançada no financeiro'); M.close();
+      };
+    }
+  });
+}
+function delVenda(id) {
+  const v = S.vendas.find(x => x.id === id); if (!v) return false;
+  const ps = S.parcelas.filter(p => p.vendaId === id); const rec = ps.filter(p => p.status === 'recebida').length;
+  if (!confirm(`Excluir esta venda?\n\n• As peças voltam para o estoque\n• ${ps.length} parcela(s) serão removidas${rec ? ` (${rec} já recebida(s))` : ''}\n• Os lançamentos no financeiro ligados a ela também serão removidos`)) return false;
+  const ops = [{t:'del', col:'vendas', id}, {t:'del', col:'movimentos', id:'mov_venda_' + id}];
+  ps.forEach(p => ops.push({t:'del', col:'parcelas', id:p.id}, {t:'del', col:'movimentos', id:'mov_parc_' + p.id}));
+  commit(ops); toast('Venda excluída'); return true;
+}
+ACT.novaVenda = () => { if (!S.produtos.length) return toast('Cadastre produtos e registre uma entrada no Estoque primeiro', 'err'); openVenda(null); };
+ACT.editVenda = d => openVenda(d.id);
+ACT.delVenda = d => delVenda(d.id);
+
+/* ---------------- fatura / carnê ---------------- */
+ACT.fatura = d => {
+  const v = S.vendas.find(x => x.id === d.id); if (!v) return;
+  const t = vendaTotals(v), c = derived().C[v.clienteId], ps = S.parcelas.filter(p => p.vendaId === v.id).sort((a, b) => a.numero - b.numero);
+  const P = derived().P, pst = derived().parcSt;
+  $('#print-root').innerHTML = `<div class="pdoc">
+    <div class="ph"><img src="img/logo-dorella-preto.png" alt="Dorella"><div style="text-align:right"><h2>${ps.length ? 'Carnê de pagamento' : 'Comprovante de venda'}</h2><div style="font-size:12px">Emitido em ${fmtDate(today())}</div></div></div>
+    <div style="display:flex;justify-content:space-between;gap:20px;font-size:13px;margin-bottom:10px">
+      <div><b>Cliente:</b> ${esc(c?.nome || 'Não informado')}${c?.telefone ? `<br>Tel.: ${esc(c.telefone)}` : ''}${c?.cpf ? `<br>CPF: ${esc(c.cpf)}` : ''}</div>
+      <div style="text-align:right"><b>Data da compra:</b> ${fmtDate(v.data)}<br><b>Pagamento:</b> ${FORMAS[v.forma] || ''}</div>
+    </div>
+    <table><thead><tr><th>Peça</th><th class="r">Qtd</th><th class="r">Unitário</th><th class="r">Total</th></tr></thead><tbody>
+      ${v.itens.map(i => `<tr><td>${esc(prodLabel(P[i.produtoId]))}</td><td class="r">${i.qtd}</td><td class="r">${money(i.preco)}</td><td class="r">${money(i.qtd * i.preco)}</td></tr>`).join('')}
+      ${v.desconto ? `<tr><td colspan="3" class="r">Desconto</td><td class="r">− ${money(v.desconto)}</td></tr>` : ''}
+      <tr><td colspan="3" class="r"><b>Total</b></td><td class="r"><b>${money(t.total)}</b></td></tr>
+      ${v.entrada ? `<tr><td colspan="3" class="r">Entrada paga</td><td class="r">${money(v.entrada)}</td></tr>` : ''}
+    </tbody></table>
+    ${ps.map(p => `<div class="coupon"><div><small>Parcela</small><b>${p.numero}/${p.de}</b></div><div><small>Vencimento</small><b>${fmtDate(p.vencimento)}</b></div><div><small>Valor</small><b>${money(p.valor)}</b></div><div><small>Situação</small><b>${pst(p) === 'recebida' ? 'PAGA em ' + fmtDate(p.recebidoEm) : '______________'}</b></div></div>`).join('')}
+    <p style="font-size:12px;text-align:center;margin-top:18px;color:#444">Dorella · Prata 925 — obrigada pela preferência ✦</p>
+  </div>`;
+  document.body.classList.add('printing');
+  const done = () => { document.body.classList.remove('printing'); removeEventListener('afterprint', done); };
+  addEventListener('afterprint', done);
+  setTimeout(() => { window.print(); setTimeout(done, 1500); }, 200);
+};
+
+/* =====================================================================
+   A RECEBER
+   ===================================================================== */
+ACT.receber = d => {
+  const p = S.parcelas.find(x => x.id === d.id); if (!p) return;
+  modal({
+    title: `Receber parcela ${p.numero}/${p.de}`,
+    body: `<div class="form">
+      <div class="hint">${esc(cliName(p.clienteId))} · vencimento ${fmtDate(p.vencimento)} · ${money(p.valor)}</div>
+      <label class="c6">Data do recebimento<input type="date" name="data" value="${today()}"></label>
+      <label class="c6">Valor recebido (R$)<input name="valor" inputmode="decimal" value="${nf(p.valor)}"></label>
+      <label>Forma<select name="forma">${['pix','dinheiro','debito','credito'].map(k => `<option value="${k}">${FORMAS[k]}</option>`).join('')}</select></label>
+    </div>`,
+    foot: `<button class="btn ghost" data-x2>Cancelar</button><button class="btn ok" data-save>${IC.check}Confirmar recebimento</button>`,
+    onMount(m, M) {
+      $('[data-x2]', m).onclick = M.close;
+      $('[data-save]', m).onclick = () => {
+        const valor = round2(num(val(m, 'valor'))); if (valor <= 0) return toast('Informe o valor recebido', 'err');
+        const data = val(m, 'data') || today(), forma = val(m, 'forma');
+        commit([
+          {t:'set', col:'parcelas', doc:{...p, status:'recebida', recebidoEm: data, valorRecebido: valor, formaRecebimento: forma}},
+          {t:'set', col:'movimentos', doc:{id:'mov_parc_' + p.id, data, tipo:'entrada', valor, descricao:`Parcela ${p.numero}/${p.de} — ${cliName(p.clienteId)} (${FORMAS[forma]})`, categoria:'Recebimento a prazo', origem:'parcela', refId: p.id}}
+        ]);
+        toast('Recebimento lançado no financeiro'); M.close();
+      };
+    }
+  });
+};
+ACT.estornar = d => {
+  const p = S.parcelas.find(x => x.id === d.id); if (!p) return;
+  if (!confirm('Desfazer o recebimento desta parcela? O lançamento no financeiro será removido.')) return;
+  const {recebidoEm, valorRecebido, formaRecebimento, ...rest} = p;
+  commit([{t:'set', col:'parcelas', doc:{...rest, status:'aberta'}}, {t:'del', col:'movimentos', id:'mov_parc_' + p.id}]);
+  toast('Recebimento desfeito');
+};
+function waLink(p) {
+  const c = derived().C[p.clienteId]; let ph = onlyDigits(c?.telefone); if (!ph) return '';
+  if (!(ph.startsWith('55') && ph.length >= 12)) ph = '55' + ph;
+  const venc = derived().parcSt(p) === 'vencida' ? `que venceu em ${fmtDate(p.vencimento)}` : `com vencimento em ${fmtDate(p.vencimento)}`;
+  const msg = `Olá, ${(c.nome || '').split(' ')[0]}! Tudo bem? 😊\nPassando para lembrar da parcela ${p.numero}/${p.de} da sua compra na Dorella Prata 925, no valor de ${money(p.valor)}, ${venc}.\nQualquer dúvida estou à disposição! ✨`;
+  return `https://wa.me/${ph}?text=${encodeURIComponent(msg)}`;
+}
+
+/* =====================================================================
+   FINANCEIRO
+   ===================================================================== */
+function openMov(id) {
+  const mv = S.movimentos.find(x => x.id === id) || {tipo:'saida'};
+  const isNew = !mv.id;
+  if (!isNew && mv.origem && mv.origem !== 'manual') return toast('Lançamento automático — altere pela venda, compra ou parcela de origem.', 'err');
+  modal({
+    title: isNew ? 'Novo lançamento' : 'Editar lançamento',
+    body: `<div class="form">
+      <div class="c12" style="grid-column:span 12"><div class="seg" id="tipo"><button type="button" data-t="entrada">Entrada (+)</button><button type="button" data-t="saida">Saída (−)</button></div></div>
+      <label class="c6">Data<input type="date" name="data" value="${esc(mv.data || today())}"></label>
+      <label class="c6">Valor (R$)<input name="valor" inputmode="decimal" value="${nf(mv.valor)}" placeholder="0,00"></label>
+      <label>Descrição<input name="desc" value="${esc(mv.descricao || '')}" placeholder="Ex.: Caixinhas para embalagem"></label>
+      <label>Categoria<input name="cat" list="finCats" value="${esc(mv.categoria || '')}" placeholder="Escolha ou digite"><datalist id="finCats"></datalist></label>
+    </div>`,
+    foot: `${!isNew ? `<button class="btn danger" data-del style="margin-right:auto">${IC.trash}Excluir</button>` : ''}<button class="btn ghost" data-x2>Cancelar</button><button class="btn" data-save>Salvar</button>`,
+    onMount(m, M) {
+      let tipo = mv.tipo;
+      const setT = t => { tipo = t; $$('#tipo button', m).forEach(b => b.classList.toggle('on', b.dataset.t === t)); $('#finCats', m).innerHTML = (t === 'entrada' ? FIN_CATS_IN : FIN_CATS_OUT).map(c => `<option value="${esc(c)}">`).join(''); };
+      setT(tipo); $$('#tipo button', m).forEach(b => b.onclick = () => setT(b.dataset.t));
+      $('[data-x2]', m).onclick = M.close;
+      if (!isNew) $('[data-del]', m).onclick = () => { if (confirm('Excluir este lançamento?')) { commit([{t:'del', col:'movimentos', id:mv.id}]); toast('Lançamento excluído'); M.close(); } };
+      $('[data-save]', m).onclick = () => {
+        const valor = round2(num(val(m, 'valor'))); if (valor <= 0) return toast('Informe o valor', 'err');
+        const descricao = val(m, 'desc'); if (!descricao) return toast('Informe uma descrição', 'err');
+        commit([{t:'set', col:'movimentos', doc:{...mv, id: mv.id || uid(), tipo, data: val(m, 'data') || today(), valor, descricao, categoria: val(m, 'cat') || (tipo === 'entrada' ? 'Outras entradas' : 'Outras despesas'), origem:'manual'}}]);
+        toast('Lançamento salvo'); M.close();
+      };
+    }
+  });
+}
+ACT.novoMov = () => openMov(null);
+ACT.editMov = d => openMov(d.id);
+
+/* =====================================================================
+   CLIENTES / FORNECEDORES
+   ===================================================================== */
+function openPessoa(col, id, {onSaved} = {}) {
+  const x = S[col].find(p => p.id === id) || {};
+  const cli = col === 'clientes';
+  modal({
+    title: (x.id ? 'Editar ' : 'Novo ') + (cli ? 'cliente' : 'fornecedor'),
+    body: `<div class="form">
+      <label>Nome${cli ? '' : ' / empresa'}<input name="nome" value="${esc(x.nome || '')}"></label>
+      <label class="c6">Telefone / WhatsApp<input name="telefone" inputmode="tel" value="${esc(x.telefone || '')}" placeholder="(11) 99999-9999"></label>
+      <label class="c6">Instagram<input name="instagram" value="${esc(x.instagram || '')}" placeholder="@usuario"></label>
+      ${cli ? `<label class="c6">CPF<input name="cpf" inputmode="numeric" value="${esc(x.cpf || '')}"></label>
+      <label class="c6">Aniversário<input type="date" name="aniversario" value="${esc(x.aniversario || '')}"></label>` : `<label class="c6">CNPJ / CPF<input name="cpf" value="${esc(x.cpf || '')}"></label><label class="c6">Site / contato<input name="site" value="${esc(x.site || '')}"></label>`}
+      <label>Endereço<input name="endereco" value="${esc(x.endereco || '')}"></label>
+      <label>Observações<textarea name="obs">${esc(x.obs || '')}</textarea></label>
+    </div>`,
+    foot: `<button class="btn ghost" data-x2>Cancelar</button><button class="btn" data-save>Salvar</button>`,
+    onMount(m, M) {
+      $('[data-x2]', m).onclick = M.close;
+      $('[data-save]', m).onclick = () => {
+        const nome = val(m, 'nome'); if (!nome) return toast('Informe o nome', 'err');
+        const doc = {...x, id: x.id || uid(), nome};
+        ['telefone', 'instagram', 'cpf', 'aniversario', 'site', 'endereco', 'obs'].forEach(k => { if ($(`[name=${k}]`, m)) doc[k] = val(m, k); });
+        commit([{t:'set', col, doc}]); toast('Cadastro salvo'); M.close(); onSaved && onSaved(doc);
+      };
+    }
+  });
+}
+ACT.novaPessoa = d => openPessoa(d.col, null);
+ACT.editPessoa = d => openPessoa(d.col, d.id);
+ACT.delPessoa = d => {
+  const x = S[d.col].find(p => p.id === d.id); if (!x) return;
+  const used = d.col === 'clientes' ? S.vendas.some(v => v.clienteId === x.id) : S.entradas.some(e => e.fornecedorId === x.id);
+  if (used) return toast('Este cadastro tem ' + (d.col === 'clientes' ? 'vendas' : 'compras') + ' registradas e não pode ser excluído.', 'err');
+  if (confirm(`Excluir "${x.nome}"?`)) { commit([{t:'del', col:d.col, id:x.id}]); toast('Cadastro excluído'); }
+};
+
+/* =====================================================================
+   BACKUP
+   ===================================================================== */
+ACT.backup = () => {
+  const data = {app:'dorella-gestao', versao:1, geradoEm: new Date().toISOString(), dados: Object.fromEntries(COLS.map(c => [c, S[c]]))};
+  const blob = new Blob([JSON.stringify(data, null, 1)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `dorella-backup-${today()}.json`; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  try { localStorage.setItem(LS_BKP, new Date().toISOString()); } catch (e) {}
+  toast('Backup gerado'); if (cur === 'config') VIEWS.config.update();
+};
+ACT.restaurar = () => {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = async () => {
+    const f = inp.files[0]; if (!f) return;
+    let data; try { data = JSON.parse(await f.text()); } catch (e) { return toast('Arquivo inválido', 'err'); }
+    const dd = data?.dados; if (!dd || typeof dd !== 'object') return toast('Este arquivo não é um backup da Dorella', 'err');
+    const cnt = COLS.map(c => `${c}: ${(dd[c] || []).length}`).join('\n');
+    if (!confirm(`Restaurar o backup de ${data.geradoEm ? new Date(data.geradoEm).toLocaleString('pt-BR') : '?'}?\n\n${cnt}\n\nATENÇÃO: todos os dados atuais serão SUBSTITUÍDOS pelos do backup${MODE === 'firebase' ? ' (para as duas pessoas)' : ''}.`)) return;
+    const ops = [];
+    COLS.forEach(c => {
+      const incoming = (dd[c] || []).filter(x => x && x.id);
+      const ids = new Set(incoming.map(x => x.id));
+      S[c].forEach(x => { if (!ids.has(x.id)) ops.push({t:'del', col:c, id:x.id}); });
+      incoming.forEach(x => ops.push({t:'set', col:c, doc:x}));
+    });
+    toast('Restaurando…');
+    await commit(ops, {wait: true});
+    toast('Backup restaurado');
+  };
+  inp.click();
+};
+ACT.csv = () => {
+  const d = derived(); const rows = [['Codigo','Produto','Categoria','Estoque','Custo medio','Preco venda','Lucro unit','Margem %']];
+  S.produtos.forEach(p => { const s = d.st[p.id]; const l = (p.preco || 0) - s.custo; rows.push([p.codigo, p.nome, p.categoria, s.qtd, s.custo.toFixed(2), (p.preco || 0).toFixed(2), l.toFixed(2), p.preco ? (l / p.preco * 100).toFixed(1) : '']); });
+  const csv = '﻿' + rows.map(r => r.map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = `dorella-estoque-${today()}.csv`; a.click();
+};
+
+/* =====================================================================
+   VIEWS
+   ===================================================================== */
+const charts = {};
+function chart(id, cfg, emptyMsg) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+  const c = document.getElementById(id); if (!c) return;
+  const box = c.parentElement; $$('.ch-empty', box).forEach(x => x.remove());
+  if (!window.Chart) emptyMsg = 'Gráficos indisponíveis sem internet.';
+  if (emptyMsg) { box.insertAdjacentHTML('beforeend', `<div class="empty ch-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">${emptyMsg}</div>`); return; }
+  charts[id] = new Chart(c, cfg);
+}
+if (window.Chart) {
+  Chart.defaults.font.family = "'Jost', system-ui, sans-serif"; Chart.defaults.color = '#78746c';
+  Chart.defaults.plugins.legend.labels.boxWidth = 10; Chart.defaults.plugins.legend.labels.boxHeight = 10;
+  Chart.defaults.plugins.tooltip.backgroundColor = '#0b0b0b'; Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.maintainAspectRatio = false;
+}
+const PAL = ['#0b0b0b','#9a9ea4','#b8976a','#5d7486','#d3d5d9','#6e5a49','#3d3d3d','#c9b99c'];
+const moneyTick = v => 'R$ ' + (Math.abs(v) >= 1000 ? (v / 1000).toLocaleString('pt-BR', {maximumFractionDigits:1}) + 'k' : v.toLocaleString('pt-BR'));
+const ttMoney = {callbacks:{label: c => `${c.dataset.label ? c.dataset.label + ': ' : ''}${money(c.parsed.y ?? c.parsed.x ?? c.parsed)}`}};
+
+function periodRange(k) {
+  const n = new Date(), t = today();
+  const f = d => iso(d);
+  switch (k) {
+    case 'mes': return [t.slice(0,7) + '-01', t];
+    case 'mespass': { const a = new Date(n.getFullYear(), n.getMonth()-1, 1), b = new Date(n.getFullYear(), n.getMonth(), 0); return [f(a), f(b)]; }
+    case '3m': return [f(new Date(n.getFullYear(), n.getMonth()-2, 1)), t];
+    case '12m': return [f(new Date(n.getFullYear(), n.getMonth()-11, 1)), t];
+    case 'ano': return [n.getFullYear() + '-01-01', t];
+    default: return ['0000-01-01', '9999-12-31'];
+  }
+}
+
+const VIEWS = {};
+
+/* ---------- DASHBOARD ---------- */
+VIEWS.dashboard = {
+  mount(el) {
+    el.innerHTML = `<div class="view-head"><div><h1>Dashboard</h1><p class="sub">Como está a Dorella</p></div>
+      <div class="acts"><select class="inp" id="dPer" style="width:auto">
+        <option value="mes">Este mês</option><option value="mespass">Mês passado</option><option value="3m">Últimos 3 meses</option><option value="12m">Últimos 12 meses</option><option value="ano">Este ano</option><option value="tudo">Todo o período</option>
+      </select><button class="btn" data-act="novaVenda">${IC.plus}Nova venda</button></div></div>
+      <div class="kpis" id="dK"></div>
+      <div class="grid2">
+        <div class="card"><h3>Faturamento e lucro · 12 meses</h3><div class="ch"><canvas id="c1"></canvas></div></div>
+        <div class="card"><h3>Vendas por categoria</h3><div class="ch"><canvas id="c2"></canvas></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Fluxo de caixa · 12 meses</h3><div class="ch"><canvas id="c3"></canvas></div></div>
+        <div class="card"><h3>A receber nos próximos meses</h3><div class="ch"><canvas id="c4"></canvas></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Peças mais vendidas</h3><div class="ch"><canvas id="c5"></canvas></div></div>
+        <div class="card"><h3>Estoque por categoria</h3><div class="ch"><canvas id="c6"></canvas></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Próximos vencimentos</h3><div id="dVenc"></div></div>
+        <div class="card"><h3>Estoque baixo</h3><div id="dLow"></div></div>
+      </div>`;
+    $('#dPer', el).value = UI.dPer;
+    $('#dPer', el).onchange = e => { UI.dPer = e.target.value; this.update(); };
+  },
+  update() {
+    const d = derived(), [a, b] = periodRange(UI.dPer), inR = s => s >= a && s <= b;
+    const vs = S.vendas.filter(v => inR(v.data)); const T = vs.map(vendaTotals);
+    const fat = sum(T, x => x.total), lucro = sum(T, x => x.lucro), pecas = sum(T, x => x.pecas);
+    const saldo = sum(S.movimentos, m => m.tipo === 'entrada' ? m.valor : -m.valor);
+    const abertas = S.parcelas.filter(p => p.status !== 'recebida');
+    const aRec = sum(abertas, p => p.valor), venc = abertas.filter(p => p.vencimento < d.t);
+    const est = S.produtos.map(p => ({p, s: d.st[p.id]})).filter(x => x.s.qtd > 0);
+    const estCusto = sum(est, x => x.s.qtd * x.s.custo), estVenda = sum(est, x => x.s.qtd * (x.p.preco || 0));
+    const recebido = sum(S.movimentos.filter(m => m.tipo === 'entrada' && inR(m.data)), m => m.valor);
+    const gastos = sum(S.movimentos.filter(m => m.tipo === 'saida' && inR(m.data)), m => m.valor);
+    const K = (l, v, h = '', cls = '') => `<div class="kpi ${cls}"><div class="l">${l}</div><div class="v">${v}</div><div class="h">${h}</div></div>`;
+    $('#dK').innerHTML =
+      K('Faturamento', money(fat), `${vs.length} venda(s) · ${pecas} peça(s)`, 'dark') +
+      K('Lucro bruto', `<span class="${lucro >= 0 ? '' : 'neg'}">${money(lucro)}</span>`, `Margem ${pct(fat ? lucro / fat : NaN)}`) +
+      K('Ticket médio', money(vs.length ? fat / vs.length : 0), 'por venda') +
+      K('Saldo em caixa', `<span class="${saldo >= 0 ? '' : 'neg'}">${money(saldo)}</span>`, `Entrou ${money(recebido)} · saiu ${money(gastos)}`) +
+      K('A receber', money(aRec), `${abertas.length} parcela(s) em aberto`) +
+      K('Vencido', `<span class="${venc.length ? 'neg' : ''}">${money(sum(venc, p => p.valor))}</span>`, `${venc.length} parcela(s) atrasada(s)`) +
+      K('Estoque (custo)', money(estCusto), `${sum(est, x => x.s.qtd)} peças em estoque`) +
+      K('Estoque (venda)', money(estVenda), `Lucro potencial ${money(estVenda - estCusto)}`);
+
+    // 1. faturamento x lucro
+    const ms = monthsBack(12), byM = Object.fromEntries(ms.map(k => [k, {f:0, l:0, e:0, s:0}]));
+    S.vendas.forEach(v => { const k = ym(v.data); if (byM[k]) { const t = vendaTotals(v); byM[k].f += t.total; byM[k].l += t.lucro; } });
+    S.movimentos.forEach(m => { const k = ym(m.data); if (byM[k]) byM[k][m.tipo === 'entrada' ? 'e' : 's'] += m.valor; });
+    const sc = {y:{ticks:{callback: moneyTick}, grid:{color:'#eeebe6'}, border:{display:false}}, x:{grid:{display:false}}};
+    chart('c1', {type:'bar', data:{labels: ms.map(ymLabel), datasets:[
+      {label:'Faturamento', data: ms.map(k => round2(byM[k].f)), backgroundColor:'#0b0b0b', borderRadius:4, maxBarThickness:22},
+      {label:'Lucro', data: ms.map(k => round2(byM[k].l)), backgroundColor:'#a7abb1', borderRadius:4, maxBarThickness:22}]},
+      options:{scales: sc, plugins:{tooltip: ttMoney}}});
+
+    // 2. por categoria
+    const byC = {};
+    vs.forEach(v => { const t = vendaTotals(v), f = t.bruto ? t.total / t.bruto : 0; v.itens.forEach(i => { const c = d.P[i.produtoId]?.categoria || 'Outros'; byC[c] = (byC[c] || 0) + i.qtd * i.preco * f; }); });
+    const cl = Object.keys(byC).sort((x, y) => byC[y] - byC[x]);
+    chart('c2', {type:'doughnut', data:{labels: cl, datasets:[{data: cl.map(c => round2(byC[c])), backgroundColor: PAL, borderColor:'#fff', borderWidth:2}]},
+      options:{cutout:'62%', plugins:{legend:{position: innerWidth < 760 ? 'bottom' : 'right'}, tooltip:{callbacks:{label: c => `${c.label}: ${money(c.parsed)} (${pct(c.parsed / fat)})`}}}}}, cl.length ? '' : 'Sem vendas no período');
+
+    // 3. fluxo de caixa
+    chart('c3', {type:'bar', data:{labels: ms.map(ymLabel), datasets:[
+      {label:'Entradas', data: ms.map(k => round2(byM[k].e)), backgroundColor:'#2e7a4d', borderRadius:4, maxBarThickness:22},
+      {label:'Saídas', data: ms.map(k => round2(byM[k].s)), backgroundColor:'#c7a79d', borderRadius:4, maxBarThickness:22},
+      {type:'line', label:'Resultado', data: ms.map(k => round2(byM[k].e - byM[k].s)), borderColor:'#0b0b0b', backgroundColor:'#0b0b0b', tension:.3, pointRadius:3}]},
+      options:{scales: sc, plugins:{tooltip: ttMoney}}});
+
+    // 4. a receber
+    const fut = monthsBack(6, new Date(new Date().getFullYear(), new Date().getMonth() + 5, 1));
+    const rl = ['Vencidas', ...fut.map(ymLabel)], rv = [sum(venc, p => p.valor), ...fut.map(k => sum(abertas.filter(p => ym(p.vencimento) === k && p.vencimento >= d.t), p => p.valor))];
+    chart('c4', {type:'bar', data:{labels: rl, datasets:[{label:'A receber', data: rv.map(round2), backgroundColor: rl.map((_, i) => i === 0 ? '#b0402d' : '#5d7486'), borderRadius:4, maxBarThickness:30}]},
+      options:{scales: sc, plugins:{legend:{display:false}, tooltip: ttMoney}}});
+
+    // 5. top peças
+    const byP = {}; vs.forEach(v => v.itens.forEach(i => byP[i.produtoId] = (byP[i.produtoId] || 0) + i.qtd));
+    const tp = Object.keys(byP).sort((x, y) => byP[y] - byP[x]).slice(0, 8);
+    chart('c5', {type:'bar', data:{labels: tp.map(id => { const n = d.P[id]?.nome || '?'; return n.length > 24 ? n.slice(0, 23) + '…' : n; }), datasets:[{label:'Peças vendidas', data: tp.map(id => byP[id]), backgroundColor:'#0b0b0b', borderRadius:4, maxBarThickness:18}]},
+      options:{indexAxis:'y', scales:{x:{ticks:{precision:0}, grid:{color:'#eeebe6'}, border:{display:false}}, y:{grid:{display:false}}}, plugins:{legend:{display:false}}}}, tp.length ? '' : 'Sem vendas no período');
+
+    // 6. estoque por categoria
+    const ec = {}; est.forEach(x => { const c = x.p.categoria || 'Outros'; ec[c] ||= {c:0, v:0}; ec[c].c += x.s.qtd * x.s.custo; ec[c].v += x.s.qtd * (x.p.preco || 0); });
+    const ek = Object.keys(ec).sort((x, y) => ec[y].v - ec[x].v);
+    chart('c6', {type:'bar', data:{labels: ek, datasets:[
+      {label:'Valor de custo', data: ek.map(k => round2(ec[k].c)), backgroundColor:'#a7abb1', borderRadius:4, maxBarThickness:22},
+      {label:'Valor de venda', data: ek.map(k => round2(ec[k].v)), backgroundColor:'#0b0b0b', borderRadius:4, maxBarThickness:22}]},
+      options:{scales: sc, plugins:{tooltip: ttMoney}}});
+
+    // listas
+    const prox = abertas.filter(p => p.vencimento <= addDays(d.t, 15)).sort((x, y) => x.vencimento.localeCompare(y.vencimento)).slice(0, 8);
+    $('#dVenc').innerHTML = prox.length ? `<div class="list-mini">${prox.map(p => `<div class="it"><span>${esc(cliName(p.clienteId))} <span class="muted">· ${p.numero}/${p.de}</span></span><span class="num">${p.vencimento < d.t ? '<span class="badge neg">vencida</span> ' : ''}${fmtDate(p.vencimento)} · <b>${money(p.valor)}</b></span></div>`).join('')}</div>` : '<div class="empty">Nada vencendo nos próximos 15 dias ✦</div>';
+    const low = S.produtos.filter(p => d.st[p.id].qtd <= (p.estoqueMin ?? 0)).sort((x, y) => d.st[x.id].qtd - d.st[y.id].qtd).slice(0, 8);
+    $('#dLow').innerHTML = low.length ? `<div class="list-mini">${low.map(p => `<div class="it"><span>${esc(prodLabel(p))}</span><span class="badge ${d.st[p.id].qtd <= 0 ? 'neg' : 'warn'}">${d.st[p.id].qtd} un.</span></div>`).join('')}</div>` : '<div class="empty">Todos os produtos acima do mínimo ✦</div>';
+  }
+};
+
+/* ---------- ESTOQUE ---------- */
+VIEWS.estoque = {
+  mount(el) {
+    el.innerHTML = `<div class="view-head"><div><h1>Estoque</h1><p class="sub">Produtos, custos, margens e entradas</p></div>
+      <div class="acts"><button class="btn ghost" data-act="novoProduto">${IC.plus}Produto</button><button class="btn" data-act="novaEntrada">${IC.plus}Entrada (compra)</button></div></div>
+      <div class="seg" id="eSeg"><button data-t="produtos">Produtos</button><button data-t="entradas">Entradas</button></div>
+      <div id="eF"></div><div id="eS" class="summary"></div><div id="eC"></div>`;
+    $$('#eSeg button', el).forEach(b => b.onclick = () => { UI.estTab = b.dataset.t; this.filters(); this.update(); });
+    this.filters();
+  },
+  filters() {
+    $$('#eSeg button').forEach(b => b.classList.toggle('on', b.dataset.t === UI.estTab));
+    const f = $('#eF');
+    if (UI.estTab === 'produtos') {
+      f.innerHTML = `<div class="filters"><input type="search" id="q" placeholder="Buscar por nome ou código" value="${esc(UI.estQ)}"><select id="cat">${catOptions(UI.estCat, 'Todas as categorias')}</select>
+        <select id="fil"><option value="">Todos</option><option value="com">Com estoque</option><option value="baixo">Estoque baixo</option><option value="zero">Zerados</option></select></div>`;
+      $('#fil').value = UI.estFil;
+      $('#q').oninput = e => { UI.estQ = e.target.value; this.update(); };
+      $('#cat').onchange = e => { UI.estCat = e.target.value; this.update(); };
+      $('#fil').onchange = e => { UI.estFil = e.target.value; this.update(); };
+    } else {
+      f.innerHTML = `<div class="filters"><input type="search" id="q" placeholder="Buscar fornecedor ou produto" value="${esc(UI.entQ)}"><input type="month" id="mes" value="${esc(UI.entMes)}" title="Filtrar por mês"></div>`;
+      $('#q').oninput = e => { UI.entQ = e.target.value; this.update(); };
+      $('#mes').onchange = e => { UI.entMes = e.target.value; this.update(); };
+    }
+  },
+  update() {
+    const d = derived();
+    if (UI.estTab === 'produtos') {
+      const q = norm(UI.estQ);
+      let ps = S.produtos.filter(p => (!q || norm(p.nome + ' ' + p.codigo).includes(q)) && (!UI.estCat || p.categoria === UI.estCat));
+      if (UI.estFil === 'com') ps = ps.filter(p => d.st[p.id].qtd > 0);
+      if (UI.estFil === 'baixo') ps = ps.filter(p => d.st[p.id].qtd <= (p.estoqueMin ?? 0));
+      if (UI.estFil === 'zero') ps = ps.filter(p => d.st[p.id].qtd <= 0);
+      ps.sort((a, b) => (a.categoria || '').localeCompare(b.categoria || '') || a.nome.localeCompare(b.nome));
+      const tq = sum(ps, p => Math.max(0, d.st[p.id].qtd)), tc = sum(ps, p => Math.max(0, d.st[p.id].qtd) * d.st[p.id].custo), tv = sum(ps, p => Math.max(0, d.st[p.id].qtd) * (p.preco || 0));
+      $('#eS').innerHTML = `<span><b>${ps.length}</b> produto(s)</span><span><b>${tq}</b> peça(s)</span><span>Custo <b>${money(tc)}</b></span><span>Venda <b>${money(tv)}</b></span><span>Margem potencial <b>${pct(tv ? (tv - tc) / tv : NaN)}</b></span>`;
+      if (!S.produtos.length) { $('#eC').innerHTML = emptyBox('Nenhum produto ainda', 'Comece registrando uma <b>entrada</b> — lá você já cadastra as peças, o custo e o preço de venda.', `<button class="btn" data-act="novaEntrada">${IC.plus}Registrar primeira entrada</button>`); return; }
+      $('#eC').innerHTML = ps.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Produto</th><th>Código</th><th class="r">Estoque</th><th class="r">Custo médio</th><th class="r">Preço venda</th><th class="r">Lucro/peça</th><th class="r">Margem</th><th></th></tr></thead><tbody>
+        ${ps.map(p => { const s = d.st[p.id], l = (p.preco || 0) - s.custo, mg = p.preco ? l / p.preco : NaN; const low = s.qtd <= (p.estoqueMin ?? 0);
+          return `<tr class="click" data-act="editProduto" data-id="${esc(p.id)}"><td class="main"><div class="t1">${esc(p.nome)}</div><div class="t2">${esc(p.categoria || '')}</div></td>
+          <td data-l="Código">${esc(p.codigo || '—')}</td>
+          <td class="r" data-l="Estoque"><span class="badge ${s.qtd <= 0 ? 'neg' : low ? 'warn' : 'dark'}">${s.qtd} un.</span></td>
+          <td class="r" data-l="Custo médio">${s.qIn ? money(s.custo) : '—'}</td>
+          <td class="r" data-l="Preço venda">${money(p.preco)}</td>
+          <td class="r ${l >= 0 ? 'pos' : 'neg'}" data-l="Lucro/peça">${s.qIn ? money(l) : '—'}</td>
+          <td class="r" data-l="Margem">${s.qIn ? pct(mg) : '—'}</td>
+          <td class="acts"><button class="icon-btn" data-act="editProduto" data-id="${esc(p.id)}" title="Editar">${IC.edit}</button><button class="icon-btn" data-act="delProduto" data-id="${esc(p.id)}" title="Excluir">${IC.trash}</button></td></tr>`; }).join('')}
+        </tbody></table></div>` : emptyBox('Nada encontrado', 'Ajuste os filtros.');
+    } else {
+      const q = norm(UI.entQ);
+      const es = S.entradas.filter(e => (!UI.entMes || ym(e.data) === UI.entMes) && (!q || norm(fornName(e.fornecedorId) + ' ' + e.itens.map(i => d.P[i.produtoId]?.nome).join(' ')).includes(q)))
+        .sort((a, b) => b.data.localeCompare(a.data) || (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+      const T = es.map(entradaTotals);
+      $('#eS').innerHTML = `<span><b>${es.length}</b> entrada(s)</span><span><b>${sum(T, t => t.pecas)}</b> peça(s)</span><span>Produtos <b>${money(sum(T, t => t.prod))}</b></span><span>Frete <b>${money(sum(T, t => t.frete))}</b></span><span>Total <b>${money(sum(T, t => t.total))}</b></span>`;
+      $('#eC').innerHTML = es.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Fornecedor / data</th><th>Itens</th><th class="r">Produtos</th><th class="r">Frete</th><th class="r">Total</th><th>Pagamento</th><th></th></tr></thead><tbody>
+        ${es.map((e, i) => { const t = T[i]; const res = e.itens.map(it => `${it.qtd}× ${d.P[it.produtoId]?.nome || '?'}`).join(', ');
+          return `<tr class="click" data-act="editEntrada" data-id="${esc(e.id)}"><td class="main"><div class="t1">${esc(fornName(e.fornecedorId))}</div><div class="t2">${fmtDate(e.data)}</div></td>          <td data-l="Itens"><span class="t2">${esc(res.length > 60 ? res.slice(0, 58) + '…' : res)}</span></td>
+          <td class="r" data-l="Produtos">${money(t.prod)}</td><td class="r" data-l="Frete">${money(t.frete)}</td><td class="r" data-l="Total"><b>${money(t.total)}</b></td>
+          <td data-l="Pagamento">${e.pago !== false ? `<span class="badge pos">Pago ${fmtDate(e.dataPagamento || e.data)}</span>` : '<span class="badge">Não lançado</span>'}</td>
+          <td class="acts"><button class="icon-btn" data-act="editEntrada" data-id="${esc(e.id)}" title="Editar">${IC.edit}</button><button class="icon-btn" data-act="delEntrada" data-id="${esc(e.id)}" title="Excluir">${IC.trash}</button></td></tr>`; }).join('')}
+        </tbody></table></div>` : emptyBox('Nenhuma entrada', 'Registre as compras de mercadoria para alimentar o estoque.', `<button class="btn" data-act="novaEntrada">${IC.plus}Nova entrada</button>`);
+    }
+  }
+};
+
+/* ---------- VENDAS ---------- */
+VIEWS.vendas = {
+  mount(el) {
+    el.innerHTML = `<div class="view-head"><div><h1>Vendas</h1><p class="sub">À vista e a prazo</p></div><div class="acts"><button class="btn" data-act="novaVenda">${IC.plus}Nova venda</button></div></div>
+      <div class="filters"><input type="search" id="q" placeholder="Buscar cliente ou peça" value="${esc(UI.venQ)}"><input type="month" id="mes" value="${esc(UI.venMes)}">
+      <select id="fm"><option value="">Todas as formas</option>${Object.entries(FORMAS).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
+      <div class="summary" id="vS"></div><div id="vC"></div>`;
+    $('#fm', el).value = UI.venForma;
+    $('#q', el).oninput = e => { UI.venQ = e.target.value; this.update(); };
+    $('#mes', el).onchange = e => { UI.venMes = e.target.value; this.update(); };
+    $('#fm', el).onchange = e => { UI.venForma = e.target.value; this.update(); };
+  },
+  update() {
+    const d = derived(), q = norm(UI.venQ);
+    const vs = S.vendas.filter(v => (!UI.venMes || ym(v.data) === UI.venMes) && (!UI.venForma || v.forma === UI.venForma) && (!q || norm(cliName(v.clienteId) + ' ' + v.itens.map(i => d.P[i.produtoId]?.nome).join(' ')).includes(q)))
+      .sort((a, b) => b.data.localeCompare(a.data) || (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+    const T = vs.map(vendaTotals), fat = sum(T, t => t.total), lu = sum(T, t => t.lucro);
+    $('#vS').innerHTML = `<span><b>${vs.length}</b> venda(s)</span><span><b>${sum(T, t => t.pecas)}</b> peça(s)</span><span>Faturamento <b>${money(fat)}</b></span><span>Lucro <b>${money(lu)}</b></span><span>Margem <b>${pct(fat ? lu / fat : NaN)}</b></span>`;
+    $('#vC').innerHTML = vs.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Peças</th><th>Pagamento</th><th class="r">Total</th><th class="r">Lucro</th><th class="r">Margem</th><th></th></tr></thead><tbody>
+      ${vs.map((v, i) => { const t = T[i]; const res = v.itens.map(it => `${it.qtd}× ${d.P[it.produtoId]?.nome || '?'}`).join(', ');
+        const ps = S.parcelas.filter(p => p.vendaId === v.id), pr = ps.filter(p => p.status === 'recebida').length;
+        return `<tr class="click" data-act="editVenda" data-id="${esc(v.id)}"><td class="main"><div class="t1">${esc(cliName(v.clienteId))}</div><div class="t2">${fmtDate(v.data)}</div></td>
+        <td data-l="Peças"><span class="t2">${esc(res.length > 60 ? res.slice(0, 58) + '…' : res)}</span></td>
+        <td data-l="Pagamento">${v.forma === 'prazo' ? `<span class="badge info">A prazo ${ps.length}× · ${pr}/${ps.length} pagas</span>` : `<span class="badge pos">${FORMAS[v.forma] || v.forma}</span>`}</td>
+        <td class="r" data-l="Total"><b>${money(t.total)}</b></td><td class="r ${t.lucro >= 0 ? 'pos' : 'neg'}" data-l="Lucro">${money(t.lucro)}</td><td class="r" data-l="Margem">${pct(t.margem)}</td>
+        <td class="acts"><button class="icon-btn" data-act="fatura" data-id="${esc(v.id)}" title="${v.forma === 'prazo' ? 'Imprimir carnê' : 'Comprovante'}">${IC.print}</button><button class="icon-btn" data-act="editVenda" data-id="${esc(v.id)}" title="Editar">${IC.edit}</button><button class="icon-btn" data-act="delVenda" data-id="${esc(v.id)}" title="Excluir">${IC.trash}</button></td></tr>`; }).join('')}
+      </tbody></table></div>` : emptyBox('Nenhuma venda', S.vendas.length ? 'Ajuste os filtros.' : 'Registre sua primeira venda.', S.vendas.length ? '' : `<button class="btn" data-act="novaVenda">${IC.plus}Nova venda</button>`);
+  }
+};
+
+/* ---------- A RECEBER ---------- */
+VIEWS.receber = {
+  mount(el) {
+    el.innerHTML = `<div class="view-head"><div><h1>A Receber</h1><p class="sub">Parcelas das vendas a prazo</p></div></div>
+      <div class="kpis" id="rK"></div>
+      <div class="filters"><select id="st"><option value="pendentes">Em aberto (inclui vencidas)</option><option value="vencida">Somente vencidas</option><option value="recebida">Recebidas</option><option value="">Todas</option></select>
+      <input type="search" id="q" placeholder="Buscar cliente" value="${esc(UI.recQ)}"><input type="month" id="mes" value="${esc(UI.recMes)}" title="Mês de vencimento"></div>
+      <div id="rC"></div>`;
+    $('#st', el).value = UI.recSt;
+    $('#st', el).onchange = e => { UI.recSt = e.target.value; this.update(); };
+    $('#q', el).oninput = e => { UI.recQ = e.target.value; this.update(); };
+    $('#mes', el).onchange = e => { UI.recMes = e.target.value; this.update(); };
+  },
+  update() {
+    const d = derived(), q = norm(UI.recQ), st = d.parcSt;
+    const ab = S.parcelas.filter(p => p.status !== 'recebida'), vc = ab.filter(p => st(p) === 'vencida'), w7 = ab.filter(p => p.vencimento >= d.t && p.vencimento <= addDays(d.t, 7));
+    const recM = S.parcelas.filter(p => p.status === 'recebida' && ym(p.recebidoEm) === d.t.slice(0, 7));
+    const K = (l, v, h, c = '') => `<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="h">${h}</div></div>`;
+    $('#rK').innerHTML = K('Em aberto', money(sum(ab, p => p.valor)), `${ab.length} parcela(s)`, 'dark') + K('Vencido', `<span class="${vc.length ? 'neg' : ''}">${money(sum(vc, p => p.valor))}</span>`, `${vc.length} parcela(s)`) + K('Vence em 7 dias', money(sum(w7, p => p.valor)), `${w7.length} parcela(s)`) + K('Recebido no mês', money(sum(recM, p => p.valorRecebido ?? p.valor)), `${recM.length} parcela(s)`);
+    let ps = S.parcelas.filter(p => (!q || norm(cliName(p.clienteId)).includes(q)) && (!UI.recMes || ym(p.vencimento) === UI.recMes));
+    if (UI.recSt === 'pendentes') ps = ps.filter(p => p.status !== 'recebida'); else if (UI.recSt) ps = ps.filter(p => st(p) === UI.recSt);
+    ps.sort((a, b) => UI.recSt === 'recebida' ? (b.recebidoEm || '').localeCompare(a.recebidoEm || '') : a.vencimento.localeCompare(b.vencimento));
+    const B = {aberta:'<span class="badge info">Em aberto</span>', vencida:'<span class="badge neg">Vencida</span>', recebida:'<span class="badge pos">Recebida</span>'};
+    $('#rC').innerHTML = ps.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Parcela</th><th>Vencimento</th><th class="r">Valor</th><th>Situação</th><th></th></tr></thead><tbody>
+      ${ps.map(p => { const s = st(p), wa = s !== 'recebida' ? waLink(p) : '';
+        const dias = s === 'vencida' ? Math.round((new Date(d.t) - new Date(p.vencimento)) / 864e5) : 0;
+        return `<tr><td class="main"><div class="t1">${esc(cliName(p.clienteId))}</div><div class="t2">Venda de ${fmtDate(d.V[p.vendaId]?.data)}</div></td>
+        <td data-l="Parcela">${p.numero}/${p.de}</td><td data-l="Vencimento">${fmtDate(p.vencimento)}${dias ? ` <span class="t2 neg">(${dias}d)</span>` : ''}</td>
+        <td class="r" data-l="Valor"><b>${money(s === 'recebida' ? (p.valorRecebido ?? p.valor) : p.valor)}</b></td>
+        <td data-l="Situação">${B[s]}${s === 'recebida' ? `<div class="t2">em ${fmtDate(p.recebidoEm)}</div>` : ''}</td>
+        <td class="acts">${s !== 'recebida' ? `<button class="btn ok sm" data-act="receber" data-id="${esc(p.id)}">${IC.check}Receber</button>` : `<button class="btn ghost sm" data-act="estornar" data-id="${esc(p.id)}">${IC.undo}Desfazer</button>`}
+          ${wa ? `<a class="icon-btn" href="${esc(wa)}" target="_blank" rel="noopener" title="Cobrar pelo WhatsApp">${IC.wa}</a>` : ''}
+          <button class="icon-btn" data-act="fatura" data-id="${esc(p.vendaId)}" title="Carnê">${IC.print}</button></td></tr>`; }).join('')}
+      </tbody></table></div>` : emptyBox('Nenhuma parcela aqui', S.parcelas.length ? 'Ajuste os filtros.' : 'Quando você fizer uma venda <b>a prazo</b>, as parcelas aparecem aqui.');
+  }
+};
+
+/* ---------- FINANCEIRO ---------- */
+VIEWS.financeiro = {
+  mount(el) {
+    el.innerHTML = `<div class="view-head"><div><h1>Financeiro</h1><p class="sub">Extrato de todas as movimentações</p></div><div class="acts"><button class="btn" data-act="novoMov">${IC.plus}Lançamento</button></div></div>
+      <div class="kpis" id="fK"></div>
+      <div class="filters"><input type="month" id="mes" value="${esc(UI.finMes)}" title="Mês"><select id="tp"><option value="">Entradas e saídas</option><option value="entrada">Somente entradas</option><option value="saida">Somente saídas</option></select><input type="search" id="q" placeholder="Buscar descrição ou categoria" value="${esc(UI.finQ)}"><button class="btn ghost sm" id="all">Ver tudo</button></div>
+      <div id="fC"></div>`;
+    $('#tp', el).value = UI.finTipo;
+    $('#mes', el).onchange = e => { UI.finMes = e.target.value; this.update(); };
+    $('#tp', el).onchange = e => { UI.finTipo = e.target.value; this.update(); };
+    $('#q', el).oninput = e => { UI.finQ = e.target.value; this.update(); };
+    $('#all', el).onclick = () => { UI.finMes = ''; $('#mes').value = ''; this.update(); };
+  },
+  update() {
+    const all = [...S.movimentos].sort((a, b) => a.data.localeCompare(b.data) || (a.atualizadoEm || '').localeCompare(b.atualizadoEm || ''));
+    let bal = 0; const saldoApos = {}; all.forEach(m => { bal += m.tipo === 'entrada' ? m.valor : -m.valor; saldoApos[m.id] = bal; });
+    const q = norm(UI.finQ);
+    const per = all.filter(m => !UI.finMes || ym(m.data) === UI.finMes);
+    const list = per.filter(m => (!UI.finTipo || m.tipo === UI.finTipo) && (!q || norm(m.descricao + ' ' + m.categoria).includes(q))).reverse();
+    const e = sum(per.filter(m => m.tipo === 'entrada'), m => m.valor), s = sum(per.filter(m => m.tipo === 'saida'), m => m.valor);
+    const aRec = sum(S.parcelas.filter(p => p.status !== 'recebida'), p => p.valor);
+    const K = (l, v, h, c = '') => `<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="h">${h}</div></div>`;
+    $('#fK').innerHTML = K('Saldo atual', `<span class="${bal < 0 ? 'neg' : ''}">${money(bal)}</span>`, 'todas as movimentações', 'dark') + K('Entradas', `<span class="pos">${money(e)}</span>`, UI.finMes ? ymLabel(UI.finMes) : 'todo o período') + K('Saídas', `<span class="neg">${money(s)}</span>`, UI.finMes ? ymLabel(UI.finMes) : 'todo o período') + K('Resultado', `<span class="${e - s >= 0 ? 'pos' : 'neg'}">${money(e - s)}</span>`, `A receber futuro: ${money(aRec)}`);
+    const O = {venda:'Venda', parcela:'Parcela', entrada:'Compra', manual:'Manual'};
+    $('#fC').innerHTML = list.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="r">Valor</th><th class="r">Saldo</th><th></th></tr></thead><tbody>
+      ${list.map(m => `<tr class="${m.origem === 'manual' ? 'click' : ''}" ${m.origem === 'manual' ? `data-act="editMov" data-id="${esc(m.id)}"` : ''}>
+        <td data-l="Data" class="num">${fmtDate(m.data)}</td>
+        <td class="main"><div class="t1">${esc(m.descricao)}</div><div class="t2">${O[m.origem] || 'Manual'}${m.atualizadoPor ? ' · por ' + esc(m.atualizadoPor) : ''}</div></td>
+        <td data-l="Categoria"><span class="badge">${esc(m.categoria || '')}</span></td>
+        <td class="r ${m.tipo === 'entrada' ? 'pos' : 'neg'}" data-l="Valor"><b>${m.tipo === 'entrada' ? '+' : '−'} ${money(m.valor)}</b></td>
+        <td class="r muted" data-l="Saldo">${money(saldoApos[m.id])}</td>
+        <td class="acts">${m.origem === 'manual' ? `<button class="icon-btn" data-act="editMov" data-id="${esc(m.id)}" title="Editar">${IC.edit}</button>` : ''}</td></tr>`).join('')}
+      </tbody></table></div>` : emptyBox('Sem movimentações', UI.finMes ? 'Nenhum lançamento neste mês.' : 'Vendas, recebimentos e compras entram aqui automaticamente. Use <b>Lançamento</b> para o saldo inicial e as despesas.');
+  }
+};
+
+/* ---------- CADASTROS ---------- */
+VIEWS.cadastros = {
+  mount(el) {
+    el.innerHTML = `<div class="view-head"><div><h1>Clientes &amp; Fornecedores</h1><p class="sub">Cadastros para agilizar vendas e compras</p></div><div class="acts" id="cA"></div></div>
+      <div class="seg" id="cSeg"><button data-t="clientes">Clientes</button><button data-t="fornecedores">Fornecedores</button></div>
+      <div class="filters"><input type="search" id="q" placeholder="Buscar por nome, telefone ou Instagram" value="${esc(UI.cadQ)}"></div><div id="cC"></div>`;
+    $$('#cSeg button', el).forEach(b => b.onclick = () => { UI.cadTab = b.dataset.t; this.update(); });
+    $('#q', el).oninput = e => { UI.cadQ = e.target.value; this.update(); };
+  },
+  update() {
+    const col = UI.cadTab, cli = col === 'clientes', q = norm(UI.cadQ);
+    $$('#cSeg button').forEach(b => b.classList.toggle('on', b.dataset.t === col));
+    $('#cA').innerHTML = `<button class="btn" data-act="novaPessoa" data-col="${col}">${IC.plus}${cli ? 'Novo cliente' : 'Novo fornecedor'}</button>`;
+    const list = S[col].filter(x => !q || norm(x.nome + ' ' + x.telefone + ' ' + x.instagram).includes(q)).sort((a, b) => a.nome.localeCompare(b.nome));
+    if (!list.length) { $('#cC').innerHTML = emptyBox(S[col].length ? 'Nada encontrado' : (cli ? 'Nenhum cliente' : 'Nenhum fornecedor'), S[col].length ? 'Ajuste a busca.' : 'Cadastre para selecionar rapidamente nas ' + (cli ? 'vendas.' : 'entradas.')); return; }
+    const stats = {};
+    if (cli) { S.vendas.forEach(v => { const s = stats[v.clienteId] ||= {n:0, t:0, a:0}; s.n++; s.t += vendaTotals(v).total; }); S.parcelas.forEach(p => { if (p.status !== 'recebida') (stats[p.clienteId] ||= {n:0, t:0, a:0}).a += p.valor; }); }
+    else S.entradas.forEach(e => { const s = stats[e.fornecedorId] ||= {n:0, t:0}; s.n++; s.t += entradaTotals(e).total; });
+    $('#cC').innerHTML = `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Telefone</th><th>Instagram</th><th class="r">${cli ? 'Compras' : 'Compras feitas'}</th><th class="r">Total</th>${cli ? '<th class="r">Em aberto</th>' : ''}<th></th></tr></thead><tbody>
+      ${list.map(x => { const s = stats[x.id] || {n:0, t:0, a:0}; const ph = onlyDigits(x.telefone);
+        return `<tr class="click" data-act="editPessoa" data-col="${col}" data-id="${esc(x.id)}"><td class="main"><div class="t1">${esc(x.nome)}</div>${x.obs ? `<div class="t2">${esc(x.obs.slice(0, 60))}</div>` : ''}</td>
+        <td data-l="Telefone">${ph ? `<a href="https://wa.me/${ph.startsWith('55') && ph.length >= 12 ? ph : '55' + ph}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(x.telefone)}</a>` : '—'}</td>
+        <td data-l="Instagram">${x.instagram ? `<a href="https://instagram.com/${esc(x.instagram.replace(/^@/, ''))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(x.instagram)}</a>` : '—'}</td>
+        <td class="r" data-l="${cli ? 'Compras' : 'Compras feitas'}">${s.n}</td><td class="r" data-l="Total">${money(s.t)}</td>
+        ${cli ? `<td class="r ${s.a ? 'neg' : ''}" data-l="Em aberto">${money(s.a)}</td>` : ''}
+        <td class="acts"><button class="icon-btn" data-act="editPessoa" data-col="${col}" data-id="${esc(x.id)}" title="Editar">${IC.edit}</button><button class="icon-btn" data-act="delPessoa" data-col="${col}" data-id="${esc(x.id)}" title="Excluir">${IC.trash}</button></td></tr>`; }).join('')}
+      </tbody></table></div>`;
+  }
+};
+
+/* ---------- CONFIG / BACKUP ---------- */
+VIEWS.config = {
+  mount(el) {
+    el.innerHTML = `<div class="view-head"><div><h1>Backup &amp; Ajustes</h1><p class="sub">Cópia de segurança, sincronização e categorias</p></div></div>
+      <div class="grid2">
+        <div class="card"><h3>Backup</h3><p class="muted" style="margin-top:-4px">Baixe uma cópia completa dos dados (arquivo .json). Guarde no Drive, iCloud ou WhatsApp. Recomendo fazer toda semana.</p>
+          <div id="bkInfo" class="hint" style="margin:10px 0"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="backup">${IC.down}Baixar backup</button><button class="btn ghost" data-act="restaurar">${IC.up}Restaurar backup</button><button class="btn ghost" data-act="csv">${IC.down}Estoque em planilha (CSV)</button></div></div>
+        <div class="card"><h3>Sincronização</h3><div id="syncBox"></div></div>
+      </div>
+      <div class="card"><h3>Categorias de peças</h3><div class="chips" id="catChips"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;max-width:420px"><input class="inp" id="newCat" placeholder="Nova categoria (ex.: Piercing)"><button class="btn" id="addCat">${IC.plus}Adicionar</button></div></div>`;
+    $('#addCat', el).onclick = () => { const v = $('#newCat').value.trim(); if (!v) return; if (cats().includes(v)) return toast('Categoria já existe', 'err'); saveCats([...cats(), v]); $('#newCat').value = ''; };
+  },
+  update() {
+    let lb = null; try { lb = localStorage.getItem(LS_BKP); } catch (e) {}
+    const tot = COLS.reduce((t, c) => t + S[c].length, 0);
+    $('#bkInfo').innerHTML = `${tot} registro(s) no sistema · Último backup neste aparelho: <b>${lb ? new Date(lb).toLocaleString('pt-BR') : 'nunca'}</b>`;
+    const sb = $('#syncBox');
+    if (MODE === 'firebase') {
+      sb.innerHTML = `<p style="margin-top:-4px">Conectado ao Firebase como <b>${esc(fbUser?.email || '')}</b>. Tudo que for lançado aparece em tempo real para a outra pessoa. Sem internet, os dados ficam salvos no aparelho e sincronizam quando a conexão voltar.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn ghost" id="logout">Sair da conta</button>${!FIREBASE_CONFIG ? '<button class="btn danger" id="rmCfg">Desconectar este aparelho</button>' : ''}</div>`;
+      $('#logout').onclick = () => { if (confirm('Sair da conta neste aparelho?')) firebase.auth().signOut(); };
+      if ($('#rmCfg')) $('#rmCfg').onclick = () => { if (confirm('Remover a configuração do Firebase deste aparelho?')) { localStorage.removeItem(LS_CFG); location.reload(); } };
+    } else {
+      sb.innerHTML = `<p style="margin-top:-4px"><span class="badge warn">Modo local</span> Os dados estão salvos <b>somente neste aparelho/navegador</b>.</p>
+        <p class="muted">Para as duas pessoas verem tudo em tempo real, configure o Firebase (veja o arquivo <b>PASSO-A-PASSO.md</b>). O ideal é colar a configuração no <code>index.html</code>. Para testar, você também pode colar aqui:</p>
+        <textarea class="inp" id="cfgTxt" rows="5" placeholder="const firebaseConfig = { apiKey: &quot;...&quot;, ... };" style="font-family:monospace;font-size:12px"></textarea>
+        <div style="margin-top:8px"><button class="btn" id="saveCfg">Conectar ao Firebase</button></div>`;
+      $('#saveCfg').onclick = () => { const c = parseCfg($('#cfgTxt').value); if (!c) return toast('Configuração inválida — cole o bloco firebaseConfig inteiro', 'err'); localStorage.setItem(LS_CFG, JSON.stringify(c)); location.reload(); };
+    }
+    $('#catChips').innerHTML = cats().map(c => `<span class="chip">${esc(c)}<button title="Remover" data-c="${esc(c)}">×</button></span>`).join('');
+    $$('#catChips button').forEach(b => b.onclick = () => {
+      const c = b.dataset.c; if (S.produtos.some(p => p.categoria === c)) return toast('Existem produtos nesta categoria', 'err');
+      if (confirm(`Remover a categoria "${c}"?`)) saveCats(cats().filter(x => x !== c));
+    });
+  }
+};
+function saveCats(list) { const g = S.config.find(c => c.id === 'geral') || {id:'geral'}; commit([{t:'set', col:'config', doc:{...g, categorias: list}}]); }
+
+/* =====================================================================
+   INICIALIZAÇÃO
+   ===================================================================== */
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault(); const f = e.target; $('#loginErr').textContent = '';
+  const btn = $('button[type=submit]', f); btn.disabled = true; btn.textContent = 'Entrando…';
+  try { await firebase.auth().signInWithEmailAndPassword(f.email.value.trim(), f.senha.value); }
+  catch (err) { $('#loginErr').textContent = ({'auth/invalid-credential':'E-mail ou senha incorretos', 'auth/wrong-password':'Senha incorreta', 'auth/user-not-found':'Usuário não encontrado', 'auth/too-many-requests':'Muitas tentativas. Aguarde um pouco.', 'auth/network-request-failed':'Sem conexão com a internet'})[err.code] || err.message; }
+  btn.disabled = false; btn.textContent = 'Entrar';
+});
+$('#forgot').onclick = async () => {
+  const em = $('#loginForm').email.value.trim(); if (!em) return $('#loginErr').textContent = 'Digite seu e-mail acima primeiro';
+  try { await firebase.auth().sendPasswordResetEmail(em); $('#loginErr').textContent = 'Enviamos um link de redefinição para o seu e-mail'; } catch (err) { $('#loginErr').textContent = err.message; }
+};
+
+(async function start() {
+  const cfg = getCfg();
+  if (cfg) {
+    try { await initFirebase(cfg); return; }
+    catch (e) { console.error(e); toast('Não foi possível conectar ao Firebase — abrindo em modo local', 'err'); MODE = 'local'; }
+  }
+  loadLocal(); showApp();
+})();
+</script>
+</body>
+</html>
